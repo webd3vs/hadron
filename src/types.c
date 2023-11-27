@@ -60,11 +60,12 @@ ClassDeclaration *initClassDeclaration(Identifier *n, Array *b) {
 	return decl;
 }
 
-AssignmentExpression *initAssignmentExpression(Typed *l, Typed *r) {
+AssignmentExpression *initAssignmentExpression(Typed *l, Typed *r, AssignmentOperator oper) {
 	AssignmentExpression *asgn = malloc(sizeof(AssignmentExpression));
 	asgn->type				   = ASSIGNMENT_EXPRESSION;
 	asgn->left				   = l;
 	asgn->right				   = r;
+	asgn->oper                 = oper;
 	return asgn;
 }
 
@@ -91,7 +92,7 @@ Identifier *initIdentifier(char *n) {
 
 TypedIdentifier *initTypedIdentifier(char *n, char *k) {
 	TypedIdentifier *id = malloc(sizeof(TypedIdentifier));
-	id->type			= IDENTIFIER;
+	id->type			= TYPED_IDENTIFIER;
 	id->name			= n;
 	id->kind			= k;
 	return id;
@@ -129,5 +130,12 @@ ExpressionStatement *initExpressionStatement(Typed *e) {
 	ExpressionStatement *stmt = malloc(sizeof(ExpressionStatement));
 	stmt->type				  = EXPRESSION_STATEMENT;
 	stmt->expr				  = e;
+	return stmt;
+}
+
+ReturnStatement *initReturnStatement(Typed *e) {
+	ReturnStatement *stmt = malloc(sizeof(ReturnStatement));
+	stmt->type            = RETURN_STATEMENT;
+	stmt->expr            = e;
 	return stmt;
 }
