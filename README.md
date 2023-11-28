@@ -17,8 +17,8 @@ Hadron is a custom programming language written in C. It is designed to be a ver
 ## Planned Features
 
  - Simple and intuitive syntax
- - Dynamic type system
- - Garbage collection
+ - Static type system
+ - On-demand garbage collection
  - Support for closures and anonymous functions
  - First-class functions
  - Modules and namespaces
