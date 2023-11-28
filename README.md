@@ -30,7 +30,7 @@ Hadron is a custom programming language written in C. It is designed to be a ver
 To build Hadron, you need to have `gcc` installed on your system. You can build Hadron by running the following commands:
 
 ```sh
-git clone https://github.com/webd3vs/hadron.git
+git clone https://github.com/hadron-lang/hadron.git
 cd hadron
 make
 ```
@@ -58,7 +58,7 @@ Here is an example of a "Hello, world!" program in Hadron:
 
 ```c
 func main {
-	log("Hello, world!")
+  log("Hello, world!")
 }
 ```
 
@@ -66,12 +66,12 @@ And here is an example of a function that calculates the nth Fibonacci number:
 
 ```c
 func fib(n) {
-	if (n < 2) return n;
-	else return fib(n-1) + fib(n-2);
+  if (n < 2) return n;
+  else return fib(n-1) + fib(n-2);
 }
 
 func main() {
-	log(fib(10));
+  log(fib(10));
 }
 ```
 
