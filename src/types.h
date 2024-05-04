@@ -112,7 +112,7 @@ typedef struct Position {
 } Position;
 
 typedef struct Token {
-	Type	 type;
+	Type     type;
 	Position pos;
 } Token;
 
@@ -140,70 +140,70 @@ typedef struct Typed {
 
 typedef struct Identifier {
 	AST_Type type;
-	char	*name;
+	char    *name;
 } Identifier;
 
 typedef struct TypedIdentifier {
 	AST_Type type;
-	char	*name;
-	char	*kind;
+	char    *name;
+	char    *kind;
 } TypedIdentifier;
 
 typedef struct Literal {
 	AST_Type type;
-	char	*value;
+	char    *value;
 } Literal;
 
 typedef struct StringLiteral {
 	AST_Type type;
-	char	*value;
+	char    *value;
 } StringLiteral;
 
 typedef struct Program {
 	AST_Type type;
-	Array	*body;
+	Array   *body;
 } Program;
 
 typedef struct ImportSpecifier {
-	AST_Type	type;
+	AST_Type    type;
 	Identifier *name;
 	Identifier *local;
 } ImportSpecifier;
 
 typedef struct ImportDeclaration {
-	AST_Type	   type;
+	AST_Type       type;
 	StringLiteral *source;
-	Array		  *specifiers;
+	Array         *specifiers;
 } ImportDeclaration;
 
 typedef struct FunctionDeclaration {
-	AST_Type	type;
-	boolean		async;
+	AST_Type    type;
+	boolean     async;
 	Identifier *name;
-	Array	   *params;
-	Array	   *body;
+	Array      *params;
+	Array      *body;
 } FunctionDeclaration;
 
 typedef struct ClassDeclaration {
-	AST_Type	type;
+	AST_Type    type;
 	Identifier *name;
-	Array	   *body;
+	Array	     *body;
 } ClassDeclaration;
 
 typedef struct CallExpression {
-	AST_Type	type;
+	AST_Type    type;
 	Identifier *callee;
-	Array	   *params;
+	Array	     *params;
 } CallExpression;
 
 typedef struct ExpressionStatement {
 	AST_Type type;
-	Typed	*expr;
+	Typed	  *expr;
 } ExpressionStatement;
 
 typedef struct ReturnStatement {
 	AST_Type type;
-	Typed *expr;
+	Typed   *expr;
 } ReturnStatement;
 
 typedef enum AssignmentOperators {
@@ -223,10 +223,10 @@ typedef enum AssignmentOperators {
 } AssignmentOperator;
 
 typedef struct AssignmentExpression {
-	AST_Type				 type;
+	AST_Type           type;
 	AssignmentOperator oper;
-	Typed					*left;
-	Typed					*right;
+	Typed              left;
+	Typed	             right;
 } AssignmentExpression;
 
 typedef enum BinaryOperators {
@@ -247,10 +247,10 @@ typedef enum BinaryOperators {
 } BinaryOperator;
 
 typedef struct BinaryExpression {
-	AST_Type	   type;
+	AST_Type	     type;
 	BinaryOperator oper;
-	Typed		  *left;
-	Typed		  *right;
+	Typed		      *left;
+	Typed		      *right;
 } BinaryExpression;
 
 typedef struct Result {
@@ -258,13 +258,12 @@ typedef struct Result {
 	void  *data;
 } Result;
 
-extern char				   *getTokenContent(char *code, Token *);
-extern void					freeProgram(Program *);
-extern Program			   *initProgram(int);
-extern FunctionDeclaration *initFunctionDeclaration(
-	boolean async, Identifier *name, Array *params, Array *body);
+extern char *getTokenContent(char *code, Token *);
+extern void freeProgram(Program *);
+extern Program *initProgram(int);
+extern FunctionDeclaration *initFunctionDeclaration(boolean async, Identifier *name, Array *params, Array *body);
 extern ClassDeclaration *initClassDeclaration(Identifier *name, Array *body);
-extern ImportSpecifier	*initImportSpecifier(
+extern ImportSpecifier *initImportSpecifier(
 	 Identifier *name, Identifier *local_name);
 extern ImportDeclaration *initImportDeclaration(
 	StringLiteral *, Array *import_specifier_array);
@@ -278,6 +277,6 @@ extern CallExpression	*initCallExpression(Identifier *callee, Array *params);
 extern BinaryExpression *initBinaryExpression(
 	BinaryOperator oper, Typed *left, Typed *right);
 extern ExpressionStatement *initExpressionStatement(Typed *expr);
-extern ReturnStatement     *initReturnStatement(Typed *expr);
+extern ReturnStatement	   *initReturnStatement(Typed *expr);
 
 #endif
