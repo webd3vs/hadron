@@ -1,0 +1,19 @@
+{
+  "$schema": "./hadron.schema.json",
+  "name": "My Hadron App",
+  "identifier": "my-hadron-app",
+  "version": "15.0.0",
+  "description": "My Hadron App",
+  "license": "MIT",
+  "author": {
+    "name": "John Doe",
+    "email": "john.doe@wxample.com",
+    "website": "https://example.com"
+  },
+  "dependencies": {
+    "hadron": "15.0.0"
+  },
+  "config": {
+    "implicitOverload": true
+  }
+}

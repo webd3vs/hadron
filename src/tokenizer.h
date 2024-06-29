@@ -8,6 +8,6 @@
 #include <math.h>
 #include <string.h>
 
-extern Result *tokenize(char *, char *);
+extern Result *tokenize(char *code, char *filename);
 
 #endif

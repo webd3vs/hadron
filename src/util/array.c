@@ -3,55 +3,61 @@
 static void initArray(Array *, int);
 
 Array *newArray(int s) {
-	Array *p = malloc(sizeof(Array));
-	initArray(p, s);
-	return p;
+  Array *p = malloc(sizeof(Array));
+  initArray(p, s);
+  return p;
 }
 
 void initArray(Array *a, int s) {
-	int size = s < 2 ? 2 : s;
-	a->a	 = malloc(sizeof(void *) * size);
-	a->l	 = 0;
-	a->s	 = size;
+  int size  = s < 2 ? 2 : s;
+  a->array  = malloc(sizeof(void *) * size);
+  a->length = 0;
+  a->size   = size;
 }
 
 void trimArray(Array *a) {
-	a->a = realloc(a->a, sizeof(void *) * a->l);
-	a->s = a->l;
+  a->array = realloc(a->array, sizeof(void *) * a->length);
+  a->size  = a->length;
 }
 
 void pushArray(Array *a, void *el) {
-	if (a->s == a->l) {
-		a->s *= 1.5;
-		a->a = realloc(a->a, sizeof(void *) * a->s);
-	};
-	a->a[a->l++] = el;
+  if (a->size == a->length) {
+    a->size *= 1.5;
+    a->array = realloc(a->array, sizeof(void *) * a->size);
+  };
+  a->array[a->length++] = el;
 }
 
 void removeArray(Array *a, int i) {
-	if (i < 0 && i >= a->l) return;
-	a->a[i] = NULL;
+  if (i < 0 && i >= a->length) return;
+  a->array[i] = NULL;
 }
 
 Array *clearArray(Array *a) {
-	Array *r = newArray(a->s);
-	for (int i = 0; i < a->l; i++) {
-		void *x = a->a[i];
-		if (x != NULL) pushArray(r, x);
-	};
-	return r;
+  Array *r = newArray(a->size);
+  for (int i = 0; i < a->length; i++) {
+    void *x = a->array[i];
+    if (x != NULL) pushArray(r, x);
+  };
+  return r;
 }
 
 // @warning `array` will be unusable after this point
 void freeArray(Array *a) {
-	for (int i = 0; i < a->l; i++)
-		free(a->a[i]);
-	free(a->a);
-	free(a);
+  for (int i = 0; i < a->length; i++)
+    free(a->array[i]);
+  free(a->array);
+  free(a);
 }
 
-void *popArray(Array *a) { return a->l > 0 ? a->a[--a->l] : NULL; }
+void *popArray(Array *a) {
+  return a->length > 0 ? a->array[--a->length] : NULL;
+}
 
-void *lastArray(Array *a) { return a->l > 0 ? a->a[a->l - 1] : NULL; }
+void *lastArray(Array *a) {
+  return a->length > 0 ? a->array[a->length - 1] : NULL;
+}
 
-void *getArray(Array *a, int i) { return i >= 0 && i < a->l ? a->a[i] : NULL; }
+void *getArray(Array *a, int i) {
+  return i >= 0 && i < a->length ? a->array[i] : NULL;
+}

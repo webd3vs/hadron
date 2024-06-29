@@ -3,9 +3,9 @@
 
 #define CHUNK_SIZE 1024
 
+#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 
 typedef struct Reader {
   FILE  *fp;
@@ -15,7 +15,7 @@ typedef struct Reader {
 } Reader;
 
 Reader *newReader(const char *filename);
-void	freeReader(Reader *reader);
-size_t	readChunk(Reader *reader);
+void    freeReader(Reader *reader);
+size_t  readChunk(Reader *reader);
 
 #endif

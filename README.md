@@ -6,6 +6,9 @@
 </p>
 <h1 align="center">Hadron</h1>
 
+# Hey!
+### <font color="#ffc">If you have any ideas (syntax / features / improvement), please leave them [here](https://hadron.webd3vs.xyz), I would really appreciate that.</font>
+
 ### *Hello and welcome to Hadron :wave:, an early-stage language development project! We're thrilled that you've stopped by our project and hope you'll consider contributing to help us speed up development.*
 ### *We welcome any ideas, feedback, and contributions from the community. Whether you're a seasoned developer or just starting out, we'd love to hear from you.*
 ### *Please take a look at our documentation and feel free to reach out to us if you have any questions.*
@@ -27,7 +30,7 @@ Hadron is a custom programming language written in C. It is designed to be a ver
 
 ## Getting Started
 
-To build Hadron, you need to have `gcc` installed on your system. You can build Hadron by running the following commands:
+To build Hadron, you need to have `clang` installed on your system. You can build Hadron by running the following commands:
 
 ```sh
 git clone https://github.com/hadron-lang/hadron.git
@@ -44,12 +47,12 @@ To run the interpreter, you can use the following command:
 To transcompile to C, you can use the following command:
 
 ```sh
-./hadron -l c input.hadron -o output.c
+./hadron -l c input.hdn -o output.c
 ```
 
 To transcompile to other languages, you can replace c with the target language. For example:
 ```sh
-./hadron -l javascript input.hadron -o output.js
+./hadron -l js input.hdn -o output.js
 ```
 ## Examples
 _Please note that the syntax may change in the future._
@@ -65,7 +68,7 @@ func main {
 And here is an example of a function that calculates the nth Fibonacci number:
 
 ```c
-func fib(n) {
+func fib(i32 n) {
   if (n < 2) return n;
   else return fib(n-1) + fib(n-2);
 }
