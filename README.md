@@ -60,21 +60,21 @@ _Please note that the syntax may change in the future._
 Here is an example of a "Hello, world!" program in Hadron:
 
 ```c
-func main {
-  log("Hello, world!")
+fx main {
+  IO:out("Hello, world!")
 }
 ```
 
 And here is an example of a function that calculates the nth Fibonacci number:
 
 ```c
-func fib(i32 n) {
-  if (n < 2) return n;
-  else return fib(n-1) + fib(n-2);
-}
+fx fib(i32 n) {
+  if n < 2 { return n; }
+  else { return fib(n-1) + fib(n-2); }
+} i32
 
-func main() {
-  log(fib(10));
+fx main() {
+  IO:out(fib(10));
 }
 ```
 
