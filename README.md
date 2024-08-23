@@ -7,7 +7,7 @@
 <h1 align="center">Hadron</h1>
 
 # Hey!
-### <font color="#ffc">If you have any ideas (syntax / features / improvement), please leave them [here](https://hadron.webd3vs.xyz), I would really appreciate that.</font>
+### <font color="#ffc">If you have any ideas (syntax / features / improvement), please leave them [here](https://hadronlang.com/feedback), I would really appreciate that.</font>
 
 ### *Hello and welcome to Hadron :wave:, an early-stage language development project! We're thrilled that you've stopped by our project and hope you'll consider contributing to help us speed up development.*
 ### *We welcome any ideas, feedback, and contributions from the community. Whether you're a seasoned developer or just starting out, we'd love to hear from you.*
