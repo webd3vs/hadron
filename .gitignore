@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+.cache/
+build/
+
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+*.hbc
