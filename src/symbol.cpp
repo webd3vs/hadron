@@ -1,5 +1,6 @@
 #include "symbol.hpp"
 
+#include <cstdio>
 #include <cstring>
 
 size_t SymbolTable::hash(const char *name) {
@@ -18,7 +19,7 @@ bool SymbolTable::insert(
     const size_t current_idx = (idx + i) % SYMBOL_TABLE_SIZE;
     Symbol      &entry       = table[current_idx];
     if (!entry.in_use) {
-      strncpy(entry.name, name, SYMBOL_NAME_LEN - 1);
+      snprintf(entry.name, SYMBOL_NAME_LEN - 1, "%s", name);
       entry.name[SYMBOL_NAME_LEN - 1] = '\0'; // Ensure null-termination
       entry.location                  = location;
       entry.type                      = type;
