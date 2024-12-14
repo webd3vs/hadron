@@ -76,7 +76,7 @@ FileResult File::write_flush() {
   return FILE_STATUS_OK;
 }
 
-constexpr char magic[] = {'\x7F', 'H', 'B', 'C'};
+constexpr char magic[4] = {'\x7F', 'H', 'B', 'C'};
 
 FileResult File::write_header() const {
   if (mode != FILE_MODE_WRITE) {
@@ -88,7 +88,8 @@ FileResult File::write_header() const {
   header.minor = 1;
   header.flags = 0;
   header.name  = name_length();
-  fwrite(&header, sizeof(FileHeader), 1, fp);
+  if (fwrite(&header, sizeof(FileHeader), 1, fp) != 1)
+    return FILE_WRITE_FAILURE;
   return FILE_STATUS_OK;
 }
 
