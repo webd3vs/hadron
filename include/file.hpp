@@ -3,8 +3,11 @@
 
 #define CHUNK_SIZE 1024
 
+#include "logger.hpp"
+
 #include <cstdint>
 #include <cstdio>
+#include <type_traits>
 
 typedef enum __attribute__((__packed__)) FileMode {
   FILE_MODE_READ,
@@ -53,18 +56,49 @@ typedef class File {
   void get_ext(char *extension) const;
 
   FileResult read();
-  FileResult read_byte(char *cp);
-  FileResult lookup_byte(char *cp) const;
-  FileResult current_byte(char *cp) const;
+  FileResult read_byte(char *pc);
+  FileResult lookup_byte(char *pc) const;
+  FileResult current_byte(char *pc) const;
   FileResult read_chunk(char *buffer, size_t start, size_t length) const;
-
-  template <typename T> FileResult write(T value);
-  template <typename T> File      &operator<<(T value);
 
   [[nodiscard]] FileResult write_header() const;
   [[nodiscard]] FileResult read_header(FileHeader *header);
   [[nodiscard]] FileResult read_name(char *name, size_t length);
 
+  template <typename T> FileResult write(T value) {
+    if (mode != FILE_MODE_WRITE) {
+      return FILE_MODE_INVALID;
+    }
+    if constexpr (std::is_same_v<T, char *>) {
+      const size_t length = strlen(value);
+      if (buffer_size + length >= CHUNK_SIZE) {
+        if (const FileResult res = write_flush(); res != FILE_STATUS_OK) {
+          return res;
+        }
+      }
+      if (const size_t write_size = fwrite(value, 1, length, fp);
+          write_size != length) {
+        return FILE_WRITE_FAILURE;
+      }
+      return FILE_STATUS_OK;
+    } else {
+      if (buffer_size + sizeof(value) == CHUNK_SIZE) {
+        if (const FileResult res = write_flush(); res != FILE_STATUS_OK) {
+          return res;
+        }
+      }
+      buffer[buffer_size] = static_cast<uint8_t>(value);
+      buffer_size += sizeof(value);
+      return FILE_STATUS_OK;
+    }
+  }
+
+  template <typename T> File &operator<<(T value) {
+    if (const FileResult res = write(value); res != FILE_STATUS_OK) {
+      Logger::fatal("File write failed");
+    }
+    return *this;
+  }
 } File;
 
 #endif // HADRON_READER_H

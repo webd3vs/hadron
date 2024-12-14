@@ -1,10 +1,7 @@
 #include "logger.hpp"
 #include "types.hpp"
 
-#include <algorithm>
 #include <cstdio>
-#include <cstdlib>
-#include <string>
 
 static const char *getData(const Token &t) {
   switch (t.type) {
@@ -103,8 +100,7 @@ static const char *getData(const Token &t) {
     case Types::NAME:
       return "NAME";
     case Types::DEC:
-      using namespace std;
-      return (string("NUM ") + to_string(t.value.f64)).c_str();
+      return "NUM";
     case Types::DOT:
       return ".";
     case Types::RANGE_EXCL:
@@ -189,33 +185,24 @@ static const char *getData(const Token &t) {
   return "";
 }
 
-void Logger::info(const char *msg) { printf("\x1b[96mINFO\x1b[m %s\n", msg); }
-
-void Logger::warn(const char *msg) { printf("\x1b[93mWARN\x1b[m %s\n", msg); }
-
-void Logger::error(const char *msg) { printf("\x1b[91mERROR\x1b[m %s\n", msg); }
-
-void Logger::fatal(const char *msg) {
-  printf("\x1b[91;7;1m FATAL \x1b[0;91m %s\x1b[m\n", msg);
-  exit(EXIT_FAILURE);
-}
-
 void Logger::print_token(const Token &token) {
-  const auto key0   = "\x1b[94m";
-  const auto key1   = "\x1b[96m";
-  const auto text   = "\x1b[92m";
-  const auto value  = "\x1b[93m";
-  const auto clear  = "\x1b[m";
-  const auto italic = "\x1b[3m";
-  printf("%s\x1b[37mToken%s ", italic, clear);
+  const bool ansi   = supportsAnsi();
+  const auto key0   = ansi ? "\x1b[94m" : "";
+  const auto key1   = ansi ? "\x1b[96m" : "";
+  const auto text   = ansi ? "\x1b[92m" : "";
+  const auto value  = ansi ? "\x1b[93m" : "";
+  const auto clear  = ansi ? "\x1b[m" : "";
+  const auto italic = ansi ? "\x1b[3m" : "";
+  const auto grey   = ansi ? "\x1b[37m" : "";
+  printf("%s%sToken%s ", italic, grey, clear);
   printf("<%s%s%s> ", text, getData(token), clear);
-  printf("{ %stype%s: ", key0, clear);
-  printf("%s%i%s, %spos%s: { %sline%s: ", value,
+  printf("{%s type%s: ", key0, clear);
+  printf("%s%i%s,%s pos%s: {%s line%s: ", value,
     static_cast<uint8_t>(token.type), clear, key0, clear, key1, clear);
-  printf("%s%i%s, %sstart%s: ", value, token.pos.line, clear, key1, clear);
-  printf("%s%i%s, %send%s: ", value, token.pos.start, clear, key1, clear);
-  printf("%s%i%s, %sabsStart%s: ", value, token.pos.end, clear, key1, clear);
-  printf("%s%i%s, %sabsEnd%s: ", value, token.pos.absStart, clear, key1, clear);
+  printf("%s%i%s,%s start%s: ", value, token.pos.line, clear, key1, clear);
+  printf("%s%i%s,%s end%s: ", value, token.pos.start, clear, key1, clear);
+  printf("%s%i%s,%s absStart%s: ", value, token.pos.end, clear, key1, clear);
+  printf("%s%i%s,%s absEnd%s: ", value, token.pos.absStart, clear, key1, clear);
   printf("%s%i%s }\n", value, token.pos.absEnd, clear);
 }
 
@@ -236,43 +223,54 @@ void Logger::disassemble(const Chunk &chunk, const char *name) {
   for (int offset = 0; offset < chunk.pos;) {
     printf(" %04x: ", offset);
 
-    switch (const auto instr = static_cast<Opcode>(chunk.code[offset])) {
-      case Opcodes::OP_RETURN:
+    switch (static_cast<OpCode>(chunk.code[offset])) {
+      case OpCodes::RETURN:
         print_bytes(1, chunk, &offset, "RET");
         break;
-      case Opcodes::OP_ADD:
+      case OpCodes::ADD:
         print_bytes(1, chunk, &offset, "ADD");
         break;
-      case Opcodes::OP_SUB:
+      case OpCodes::SUB:
         print_bytes(1, chunk, &offset, "SUB");
         break;
-      case Opcodes::OP_MUL:
+      case OpCodes::MUL:
         print_bytes(1, chunk, &offset, "MUL");
         break;
-      case Opcodes::OP_DIV:
+      case OpCodes::DIV:
         print_bytes(1, chunk, &offset, "DIV");
         break;
-      case Opcodes::OP_NEGATE:
+      case OpCodes::NEGATE:
         print_bytes(1, chunk, &offset, "NEG");
         break;
-      case Opcodes::OP_NOT:
+      case OpCodes::NOT:
         print_bytes(1, chunk, &offset, "NOT");
         break;
-      case Opcodes::OP_B_NOT:
+      case OpCodes::B_NOT:
         print_bytes(1, chunk, &offset, "B_NOT");
         break;
-      case Opcodes::OP_MOVE:
+      case OpCodes::MOVE:
         print_bytes(10, chunk, &offset, "MOVE");
         break;
-      case Opcodes::OP_LOAD:
+      case OpCodes::LOAD:
         print_bytes(2, chunk, &offset, "LOAD");
         break;
-      case Opcodes::OP_STORE:
+      case OpCodes::STORE:
         print_bytes(2, chunk, &offset, "STORE");
         break;
+      case OpCodes::RANGE_EXCL:
+      case OpCodes::RANGE_L_IN:
+      case OpCodes::RANGE_R_IN:
+      case OpCodes::RANGE_INCL:
+        print_bytes(1, chunk, &offset, "RANGE");
+        break;
+      case OpCodes::FX_ENTRY:
+        print_bytes(1, chunk, &offset, "FX ENTRY");
+        break;
+      case OpCodes::FX_EXIT:
+        print_bytes(1, chunk, &offset, "FX EXIT");
+        break;
       default:
-        printf("Unknown opcode %d\n", static_cast<char>(instr));
-        ++offset;
+        print_bytes(1, chunk, &offset, "UNKNOWN");
     }
   }
 }

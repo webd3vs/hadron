@@ -3,8 +3,6 @@
 
 #define MAX_ARGS 10
 
-#include "logger.hpp"
-
 typedef struct Argument {
   const char *long_name;
   char        short_name;
@@ -13,7 +11,12 @@ typedef struct Argument {
   bool        has_value;
 } Argument;
 
-typedef struct ArgumentParser {
+typedef class ArgumentParser {
+  Argument &def();
+  Argument &find(const char *name);
+  Argument &find_short(char name);
+
+  public:
   int      arg_count{0};
   int      positional_count{0};
   Argument args[MAX_ARGS]{};
@@ -28,13 +31,6 @@ typedef struct ArgumentParser {
     add(nullptr, '\0');
     args[0].has_value = false;
   }
-
-  private:
-  Argument &def();
-  Argument &find(const char *name);
-  Argument &find_short(char name);
 } ArgumentParser;
-
-extern void initArgumentParser(ArgumentParser *parser, Logger *logger);
 
 #endif // HADRON_ARGUMENTS_H

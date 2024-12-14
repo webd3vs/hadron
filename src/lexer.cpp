@@ -1,4 +1,6 @@
 #include "lexer.hpp"
+
+#include "halloc.h"
 #include "logger.hpp"
 #include "types.hpp"
 
@@ -131,8 +133,8 @@ bool Lexer::match(const char c) {
 static uint8_t constant_index = 0;
 
 // function to create a token
-Token Lexer::emit(const Type type) const {
-  Token token;
+Token Lexer::emit(const Type type) {
+  Token token{};
 
   token.type         = type;
   token.pos.start    = start;
@@ -144,10 +146,17 @@ Token Lexer::emit(const Type type) const {
   switch (type) {
     case Types::STR: {
       const size_t len = token.pos.absEnd - token.pos.absStart;
-      token.value.ptr  = malloc(len + 1);
+      token.value.ptr  = halloc(len - 1);
       token.index      = constant_index++;
       input.read_chunk(
-        static_cast<char *>(token.value.ptr), token.pos.start, len);
+        static_cast<char *>(token.value.ptr), token.pos.absStart + 1, len - 2);
+      break;
+    }
+    case Types::NAME: {
+      const size_t len = token.pos.absEnd - token.pos.absStart;
+      token.value.ptr  = halloc(len + 1);
+      input.read_chunk(
+        static_cast<char *>(token.value.ptr), token.pos.absStart, len);
       break;
     }
     case Types::DEC: {
@@ -165,6 +174,7 @@ Token Lexer::emit(const Type type) const {
       input.read_chunk(buffer, token.pos.absStart, MAX_NUMBER_LENGTH);
     }
     default:
+      had_float = false;
       break;
   }
 
@@ -194,7 +204,7 @@ Token Lexer::number(const char first_char) {
   // . switch + bitfield
   // . switch + booleans
   // . if branching
-  // This one has proven to be the fastest.
+  // This one has proved to be the fastest.
 
   char    num[96]    = {};
   char    frac[16]   = {};
@@ -207,7 +217,6 @@ Token Lexer::number(const char first_char) {
   uint8_t *index  = &num_index;
 
   bool done      = false;
-  bool had_float = false;
   bool had_exp   = false;
   bool is_hex    = false;
   bool is_binary = false;
@@ -222,6 +231,8 @@ Token Lexer::number(const char first_char) {
   switch (first_char) {
     case '.':
       had_float = true;
+      buffer    = frac;
+      index     = &frac_index;
       break;
     case '0':
       set_type  = true;
@@ -393,6 +404,7 @@ Token Lexer::number(const char first_char) {
         index  = &exp_index;
         break;
       case '_':
+      case '\'':
         if (had_under)
           return emit(Types::ERROR);
         had_under = true;
@@ -416,37 +428,37 @@ Token Lexer::number(const char first_char) {
   for (int i = 0; i < num_index; i++) {
     const int j = num_index - 1 - i;
     if (is_hex) {
-      value += num[j] * std::pow(16.0, i);
+      value += num[j] * pow(16.0, i);
       continue;
     }
     if (is_binary) {
-      value += num[j] * std::pow(2.0, i);
+      value += num[j] * pow(2.0, i);
       continue;
     }
     if (is_octal || oct_loose) {
-      value += num[j] * std::pow(8.0, i);
+      value += num[j] * pow(8.0, i);
       continue;
     }
-    value += num[j] * std::pow(10.0, i);
+    value += num[j] * pow(10.0, i);
   }
   for (int i = 0; i < frac_index; i++) {
     if (is_hex) {
-      value += frac[i] / std::pow(16.0, i + 1);
+      value += frac[i] / pow(16.0, i + 1);
       continue;
     }
-    value += frac[i] / std::pow(10.0, i + 1);
+    value += frac[i] / pow(10.0, i + 1);
   }
 
   uint32_t exponent = 0;
   for (int i = 0; i < exp_index; i++) {
     const int j = exp_index - 1 - i;
-    exponent += static_cast<uint32_t>(exp[j] * std::pow(10, i));
+    exponent += static_cast<uint32_t>(exp[j] * pow(10, i));
   }
 
   if (is_exp_neg)
-    value /= std::pow(is_hex ? 2.0 : 10.0, exponent);
+    value /= pow(is_hex ? 2.0 : 10.0, exponent);
   else
-    value *= std::pow(is_hex ? 2.0 : 10.0, exponent);
+    value *= pow(is_hex ? 2.0 : 10.0, exponent);
 
   if (is_hex)
     return emit(Types::HEX, value);
@@ -474,8 +486,11 @@ Token Lexer::advance() {
         if (match('.')) {
           if (match('='))
             return emit(Types::RANGE_R_IN);
-          if (match('.'))
-            return emit(Types::ERROR);
+          if (peek() == '.') {
+            if (peek2() == '.' || !had_float)
+              return next(), next(), emit(Types::ERROR);
+            return emit(Types::RANGE_EXCL);
+          }
           return emit(Types::RANGE_EXCL);
         }
         return emit(Types::DOT);
@@ -618,6 +633,15 @@ Token Lexer::advance() {
         if (err)
           Logger::fatal("Unterminated string");
 
+        next();
+        return emit(Types::STR);
+      }
+      case '`': { // multiline strings
+        while (peek() != '`') {
+          if (peek() == '\\')
+            next();
+          next();
+        }
         next();
         return emit(Types::STR);
       }

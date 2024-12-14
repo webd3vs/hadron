@@ -11,7 +11,8 @@ size_t SymbolTable::hash(const char *name) {
   return hash % SYMBOL_TABLE_SIZE;
 }
 
-bool SymbolTable::insert(const char *name, const int location, const int type) {
+bool SymbolTable::insert(
+  const char *name, const int location, const SymbolType type) {
   const size_t idx = hash(name);
   for (size_t i = 0; i < SYMBOL_TABLE_SIZE; ++i) {
     const size_t current_idx = (idx + i) % SYMBOL_TABLE_SIZE;

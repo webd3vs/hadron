@@ -3,31 +3,20 @@
 
 #include "lexer.hpp"
 #include "logger.hpp"
+#include "symbol.hpp"
 
-#include <symbol.hpp>
-
-typedef struct Parser {
+typedef class Parser {
+  public:
   Lexer      &lexer;
+  Chunk      &chunk;
   Token       current_token{};
   Token       prev_token{};
-  Chunk      &chunk;
   SymbolTable symbols;
 
-  explicit Parser(Lexer &lexer, Chunk &chunk) : lexer(lexer), chunk(chunk) {
-    advance();
-  }
-  void advance() {
-    prev_token    = current_token;
-    current_token = lexer.advance();
-  }
-  Token &consume(const Type type, const char *error) {
-    if (current_token.type == type) {
-      advance();
-      return current_token;
-    }
-    Logger::fatal(error);
-    return current_token; // never reached
-  }
+  explicit Parser(Lexer &lexer, Chunk &chunk);
+  void     advance();
+  Token   &consume(Type type, const char *error);
+  bool     match(Type type);
 } Parser;
 
 typedef void (*NudFn)(Parser &, const Token &);
@@ -35,16 +24,22 @@ typedef void (*LedFn)(Parser &, const Token &);
 
 typedef enum class Precedence : int8_t {
   NUL = -1,
+  LIT,
   ASG = 1,
-  OR_,
-  AND,
+  LOR,
+  LND,
+  BOR,
+  XOR,
+  BND,
   EQT,
   CMP,
+  BSH,
   TRM,
   FCT,
+  RNG,
   UNR,
   GRP,
-  LIT,
+  MAX,
 } Precedence;
 
 typedef struct ParseRule {

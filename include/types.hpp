@@ -123,6 +123,9 @@ typedef union Any {
 
 typedef struct Token {
   Type type;
+  // todo temp
+  uint8_t index;
+
   struct Position {
     int line;
     int start;
@@ -131,8 +134,6 @@ typedef struct Token {
     int absEnd;
   } pos;
   Any value;
-  // todo temp
-  uint8_t index;
 } Token;
 
 #endif // HADRON_TYPES_H

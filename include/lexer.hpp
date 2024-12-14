@@ -1,12 +1,12 @@
 #ifndef HADRON_LEXER_H
 #define HADRON_LEXER_H 1
 
+#include "input.hpp"
 #include "types.hpp"
-
-#include <input.hpp>
 
 class Lexer {
   bool         end{false};
+  bool         had_float{false}; // State-tracking for range operator parsing
   char         current_char{'\0'};
   char         next_char{'\0'};
   int          iterator{-1};
@@ -22,7 +22,7 @@ class Lexer {
   [[nodiscard]] char peek2() const;
   [[nodiscard]] bool match(char c);
 
-  [[nodiscard]] Token emit(Type type) const;
+  [[nodiscard]] Token emit(Type type);
   [[nodiscard]] Token emit(Type type, double value) const;
   [[nodiscard]] Token number(char first_char);
 

@@ -1,12 +1,6 @@
 #include "file.hpp"
 #include "logger.hpp"
 
-#include <bytecode.hpp>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <stdexcept>
-
 File::File(const char *file_name, const FileMode mode) {
   this->mode      = mode;
   this->file_name = file_name;
@@ -53,21 +47,21 @@ FileResult File::read() {
   return FILE_STATUS_OK;
 }
 
-FileResult File::read_byte(char *cp) {
+FileResult File::read_byte(char *pc) {
   if (mode != FILE_MODE_READ) {
     return FILE_MODE_INVALID;
   }
   if (buffer_pos == buffer_size) {
     if (eof) {
-      *cp = '\0';
+      *pc = '\0';
       return FILE_READ_DONE;
     }
     if (read() == FILE_READ_FAILURE) {
-      *cp = '\0';
+      *pc = '\0';
       return FILE_READ_FAILURE;
     }
   }
-  *cp = static_cast<char>(buffer[buffer_pos++]);
+  *pc = static_cast<char>(buffer[buffer_pos++]);
   return FILE_STATUS_OK;
 }
 
@@ -82,54 +76,7 @@ FileResult File::write_flush() {
   return FILE_STATUS_OK;
 }
 
-template <typename T> FileResult File::write(T value) {
-  if (mode != FILE_MODE_WRITE) {
-    return FILE_MODE_INVALID;
-  }
-  if constexpr (std::is_same_v<T, char *>) {
-    const size_t length = strlen(value);
-    if (buffer_size + length >= CHUNK_SIZE) {
-      if (const FileResult res = write_flush(); res != FILE_STATUS_OK) {
-        return res;
-      }
-    }
-    if (const size_t write_size = fwrite(value, 1, length, fp);
-        write_size != length) {
-      return FILE_WRITE_FAILURE;
-    }
-    return FILE_STATUS_OK;
-  } else {
-    if (buffer_size + sizeof(value) == CHUNK_SIZE) {
-      if (const FileResult res = write_flush(); res != FILE_STATUS_OK) {
-        return res;
-      }
-    }
-    buffer[buffer_size] = static_cast<uint8_t>(value);
-    buffer_size += sizeof(value);
-    return FILE_STATUS_OK;
-  }
-}
-
-template <typename T> File &File::operator<<(T value) {
-  if (const FileResult res = write(value); res != FILE_STATUS_OK) {
-    Logger::fatal("File write failed");
-  }
-  return *this;
-}
-
-template File &File::operator<<(uint8_t value);
-template File &File::operator<<(uint16_t value);
-template File &File::operator<<(uint32_t value);
-template File &File::operator<<(uint64_t value);
-template File &File::operator<<(int8_t value);
-template File &File::operator<<(int16_t value);
-template File &File::operator<<(int32_t value);
-template File &File::operator<<(int64_t value);
-template File &File::operator<<(char value);
-template File &File::operator<<(char *value);
-template File &File::operator<<(Opcode value);
-
-constexpr char magic[] = "\x7FHBC";
+constexpr char magic[] = {'\x7F', 'H', 'B', 'C'};
 
 FileResult File::write_header() const {
   if (mode != FILE_MODE_WRITE) {
@@ -170,22 +117,22 @@ FileResult File::read_name(char *name, const size_t length) {
   return FILE_STATUS_OK;
 }
 
-FileResult File::lookup_byte(char *cp) const {
+FileResult File::lookup_byte(char *pc) const {
   if (mode != FILE_MODE_READ) {
     return FILE_MODE_INVALID;
   }
   if (buffer_pos == buffer_size) {
     const long   current   = ftell(fp);
-    const size_t read_size = fread(cp, sizeof(char), 1, fp);
+    const size_t read_size = fread(pc, sizeof(char), 1, fp);
     fseek(fp, current, SEEK_SET);
     return read_size ? FILE_STATUS_OK : FILE_READ_FAILURE;
   }
-  *cp = static_cast<char>(*(buffer + buffer_pos));
+  *pc = static_cast<char>(*(buffer + buffer_pos));
   return FILE_STATUS_OK;
 }
 
-FileResult File::current_byte(char *cp) const {
-  *cp = static_cast<char>(*(buffer + buffer_pos - 1));
+FileResult File::current_byte(char *pc) const {
+  *pc = static_cast<char>(*(buffer + buffer_pos - 1));
   return FILE_STATUS_OK;
 }
 

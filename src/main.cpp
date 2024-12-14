@@ -52,9 +52,10 @@ static void repl() {
     Parser      parser_instance(lexer, chunk);
 
     parse_expression(parser_instance, Precedence::NUL);
-    chunk.write(Opcodes::OP_RETURN);
+    chunk.write(OpCodes::RETURN);
 
     VM vm;
+    Logger::disassemble(chunk, "REPL");
     vm.interpret(chunk);
   }
 }
@@ -105,7 +106,7 @@ int main(const int argc, char *argv[]) {
     Parser parser_instance(lexer, chunk);
 
     parse_expression(parser_instance, Precedence::NUL);
-    chunk.write(Opcodes::OP_RETURN);
+    chunk.write(OpCodes::RETURN);
 
     char path[MAX_DIR_LENGTH + MAX_FILENAME_LENGTH];
     build_path(file, path);

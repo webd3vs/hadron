@@ -1,4 +1,6 @@
 #include "arguments.hpp"
+#include "logger.hpp"
+
 #include <cstring>
 
 void ArgumentParser::add(const char *long_name, const char short_name) {

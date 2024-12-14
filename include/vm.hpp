@@ -1,6 +1,7 @@
 #ifndef HADRON_VM_H
 #define HADRON_VM_H
-#include <bytecode.hpp>
+
+#include "bytecode.hpp"
 
 typedef enum InterpretResult {
   INTERPRET_OK,
@@ -12,7 +13,7 @@ typedef enum InterpretResult {
 #define MAX_CONSTANTS 0x100
 
 typedef class VM {
-  Chunk *chunk;
+  // Chunk *chunk;
   // uint8_t *ip;
   double stack[MAX_STACK]{};
   double constants[MAX_CONSTANTS]{};
@@ -20,7 +21,7 @@ typedef class VM {
   int    pc{-1};
 
   public:
-  VM() : chunk(nullptr) {}
+  VM() = default;
 
   InterpretResult interpret(Chunk &chunk);
 } VM;
