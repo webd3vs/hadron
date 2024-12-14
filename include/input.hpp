@@ -38,7 +38,7 @@ class StringInput final : public InputSource {
 
   public:
   explicit StringInput(const char *source)
-    : source(source), length(strlen(source)) {}
+    : source(source), length(strnlen(source, 0x400)) {}
 
   char               next() override;
   [[nodiscard]] char peek() const override;
