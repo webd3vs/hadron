@@ -22,8 +22,10 @@ typedef enum __attribute__((__packed__)) FileResult {
   FILE_WRITE_FAILURE,
 } FileResult;
 
+#define FILE_HEADER_MAGIC_SIZE 4
+
 typedef struct FileHeader {
-  char    magic[4];
+  char    magic[FILE_HEADER_MAGIC_SIZE];
   uint8_t major;
   uint8_t minor;
   uint8_t flags;

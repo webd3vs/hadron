@@ -76,14 +76,14 @@ FileResult File::write_flush() {
   return FILE_STATUS_OK;
 }
 
-constexpr char magic[4] = {'\x7F', 'H', 'B', 'C'};
+constexpr char magic[FILE_HEADER_MAGIC_SIZE] = {'\x7F', 'H', 'B', 'C'};
 
 FileResult File::write_header() const {
   if (mode != FILE_MODE_WRITE) {
     return FILE_MODE_INVALID;
   }
   FileHeader header;
-  memcpy(header.magic, magic, 4);
+  memcpy(header.magic, magic, FILE_HEADER_MAGIC_SIZE);
   header.major = 0;
   header.minor = 1;
   header.flags = 0;
