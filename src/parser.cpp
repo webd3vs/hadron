@@ -192,110 +192,98 @@ static LedFn parse_dcl = [](Parser &parser, const Token &) {
 };
 
 #define parse_nul nullptr // for code alignment purposes
-#define as_int    static_cast<int>
+#define I         static_cast<int>
 
-static ParseRule rules[as_int(Types::MAX_TOKENS)] = {
-  {Precedence::MAX, parse_nul, parse_nul}, // ERROR
-
-  // COMPARE
-  {Precedence::EQT, parse_nul, parse_nul}, // CMP_EQ
-  {Precedence::EQT, parse_nul, parse_nul}, // CMP_NEQ
-  {Precedence::CMP, parse_nul, parse_nul}, // CMP_GT
-  {Precedence::CMP, parse_nul, parse_nul}, // CMP_GEQ
-  {Precedence::CMP, parse_nul, parse_nul}, // CMP_LT
-  {Precedence::CMP, parse_nul, parse_nul}, // CMP_LEQ
-
-  // ASSIGN
-  {Precedence::ASG, parse_nul, parse_nul}, // CST_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // SET_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // ADD_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // SUB_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // MUL_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // DIV_EQ
-  {Precedence::UNR, parse_nul, parse_nul}, // INCR
-  {Precedence::UNR, parse_nul, parse_nul}, // DECR
-  {Precedence::ASG, parse_nul, parse_nul}, // L_AND_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // L_OR_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // B_AND_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // B_OR_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // B_XOR_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // POW_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // REM_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // R_SHIFT_EQ
-  {Precedence::ASG, parse_nul, parse_nul}, // L_SHIFT_EQ
-
-  // KEYWORD
-  {Precedence::NUL, parse_nul, parse_nul}, // AS
-  {Precedence::NUL, parse_nul, parse_nul}, // ASYNC
-  {Precedence::NUL, parse_nul, parse_nul}, // AWAIT
-  {Precedence::NUL, parse_nul, parse_nul}, // CASE
-  {Precedence::NUL, parse_nul, parse_nul}, // CLASS
-  {Precedence::NUL, parse_nul, parse_nul}, // DEFAULT
-  {Precedence::NUL, parse_nul, parse_nul}, // DO
-  {Precedence::NUL, parse_nul, parse_nul}, // ELSE
-  {Precedence::NUL, parse_nul, parse_nul}, // FALSE
-  {Precedence::NUL, parse_nul, parse_nul}, // FOR
-  {Precedence::NUL, parse_nul, parse_nul}, // FROM
-  {Precedence::NUL, parse_fxn, parse_nul}, // FX
-  {Precedence::NUL, parse_nul, parse_nul}, // IF
-  {Precedence::NUL, parse_nul, parse_nul}, // IMPORT
-  {Precedence::NUL, parse_nul, parse_nul}, // NEW
-  {Precedence::NUL, parse_nul, parse_nul}, // RETURN
-  {Precedence::NUL, parse_nul, parse_nul}, // SELECT
-  {Precedence::NUL, parse_nul, parse_nul}, // SWITCH
-  {Precedence::NUL, parse_nul, parse_nul}, // TRUE
-  {Precedence::NUL, parse_nul, parse_nul}, // WHILE
-  {Precedence::NUL, parse_nul, parse_nul}, // NUL
-
-  // TYPE
-  {Precedence::LIT, parse_lit, parse_nul}, // STR
-  {Precedence::LIT, parse_dcl, parse_nul}, // NAME
-  {Precedence::LIT, parse_lit, parse_nul}, // DEC
-  {Precedence::LIT, parse_lit, parse_nul}, // HEX
-  {Precedence::LIT, parse_lit, parse_nul}, // OCTAL
-  {Precedence::LIT, parse_lit, parse_nul}, // BINARY
-  {Precedence::NUL, parse_nul, parse_nul}, // DOT
-  {Precedence::NUL, parse_nul, parse_nul}, // SEMICOLON
-  {Precedence::NUL, parse_nul, parse_nul}, // NEWLINE
-  {Precedence::NUL, parse_nul, parse_nul}, // COMMA
-  {Precedence::NUL, parse_nul, parse_nul}, // AT
-  {Precedence::NUL, parse_nul, parse_nul}, // HASH
-  {Precedence::NUL, parse_nul, parse_nul}, // DOLLAR
-  {Precedence::NUL, parse_nul, parse_nul}, // QUERY
-  {Precedence::NUL, parse_nul, parse_nul}, // L_BRACKET
-  {Precedence::NUL, parse_nul, parse_nul}, // R_BRACKET
-  {Precedence::GRP, parse_grp, parse_nul}, // L_PAREN
-  {Precedence::NUL, parse_nul, parse_nul}, // R_PAREN
-  {Precedence::NUL, parse_nul, parse_nul}, // L_CURLY
-  {Precedence::NUL, parse_nul, parse_nul}, // R_CURLY
-  {Precedence::NUL, parse_nul, parse_nul}, // COLON
-  {Precedence::NUL, parse_nul, parse_nul}, // END
-
-  // RANGE
-  {Precedence::RNG, parse_nul, parse_rng}, // RANGE_EXCL
-  {Precedence::RNG, parse_nul, parse_rng}, // RANGE_L_IN
-  {Precedence::RNG, parse_nul, parse_rng}, // RANGE_R_IN
-  {Precedence::RNG, parse_nul, parse_rng}, // RANGE_INCL
-
-  // OPERATION
-  {Precedence::TRM, parse_unr, parse_bin}, // ADD
-  {Precedence::TRM, parse_unr, parse_bin}, // SUB
-  {Precedence::FCT, parse_nul, parse_bin}, // MUL
-  {Precedence::FCT, parse_nul, parse_bin}, // DIV
-  {Precedence::LND, parse_nul, parse_bin}, // L_AND
-  {Precedence::LOR, parse_nul, parse_bin}, // L_OR
-  {Precedence::BND, parse_nul, parse_bin}, // B_AND
-  {Precedence::BOR, parse_nul, parse_bin}, // B_OR
-  {Precedence::XOR, parse_nul, parse_bin}, // CARET
-  {Precedence::UNR, parse_unr, parse_nul}, // B_NOT
-  {Precedence::UNR, parse_unr, parse_nul}, // L_NOT
-  {Precedence::NUL, parse_nul, parse_nul}, // L_SHIFT
-  {Precedence::NUL, parse_nul, parse_nul}, // R_SHIFT
-  {Precedence::NUL, parse_nul, parse_nul}, // POW
-  {Precedence::NUL, parse_nul, parse_nul}, // REM
+static ParseRule rules[I(Types::MAX_TOKENS)] = {
+  [I(Types::ERROR)]      = {Precedence::MAX, parse_nul, parse_nul},
+  [I(Types::CMP_EQ)]     = {Precedence::EQT, parse_nul, parse_nul},
+  [I(Types::CMP_NEQ)]    = {Precedence::EQT, parse_nul, parse_nul},
+  [I(Types::CMP_GT)]     = {Precedence::CMP, parse_nul, parse_nul},
+  [I(Types::CMP_GEQ)]    = {Precedence::CMP, parse_nul, parse_nul},
+  [I(Types::CMP_LT)]     = {Precedence::CMP, parse_nul, parse_nul},
+  [I(Types::CMP_LEQ)]    = {Precedence::CMP, parse_nul, parse_nul},
+  [I(Types::CST_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::SET_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::EQ)]         = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::ADD_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::SUB_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::MUL_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::DIV_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::INCR)]       = {Precedence::UNR, parse_nul, parse_nul},
+  [I(Types::DECR)]       = {Precedence::UNR, parse_nul, parse_nul},
+  [I(Types::L_AND_EQ)]   = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::L_OR_EQ)]    = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::B_AND_EQ)]   = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::B_OR_EQ)]    = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::B_XOR_EQ)]   = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::POW_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::REM_EQ)]     = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::R_SHIFT_EQ)] = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::L_SHIFT_EQ)] = {Precedence::ASG, parse_nul, parse_nul},
+  [I(Types::AS)]         = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::ASYNC)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::AWAIT)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::CASE)]       = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::CLASS)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::DEFAULT)]    = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::DO)]         = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::ELSE)]       = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::FALSE)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::FOR)]        = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::FROM)]       = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::FX)]         = {Precedence::NUL, parse_fxn, parse_nul},
+  [I(Types::IF)]         = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::IMPORT)]     = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::NEW)]        = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::RETURN)]     = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::SELECT)]     = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::SWITCH)]     = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::TRUE)]       = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::WHILE)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::NUL)]        = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::STR)]        = {Precedence::LIT, parse_lit, parse_nul},
+  [I(Types::NAME)]       = {Precedence::LIT, parse_dcl, parse_nul},
+  [I(Types::DEC)]        = {Precedence::LIT, parse_lit, parse_nul},
+  [I(Types::HEX)]        = {Precedence::LIT, parse_lit, parse_nul},
+  [I(Types::OCTAL)]      = {Precedence::LIT, parse_lit, parse_nul},
+  [I(Types::BINARY)]     = {Precedence::LIT, parse_lit, parse_nul},
+  [I(Types::DOT)]        = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::SEMICOLON)]  = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::NEWLINE)]    = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::COMMA)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::AT)]         = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::HASH)]       = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::DOLLAR)]     = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::QUERY)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::L_BRACKET)]  = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::R_BRACKET)]  = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::L_PAREN)]    = {Precedence::GRP, parse_grp, parse_nul},
+  [I(Types::R_PAREN)]    = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::L_CURLY)]    = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::R_CURLY)]    = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::COLON)]      = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::END)]        = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::RANGE_EXCL)] = {Precedence::RNG, parse_nul, parse_rng},
+  [I(Types::RANGE_L_IN)] = {Precedence::RNG, parse_nul, parse_rng},
+  [I(Types::RANGE_R_IN)] = {Precedence::RNG, parse_nul, parse_rng},
+  [I(Types::RANGE_INCL)] = {Precedence::RNG, parse_nul, parse_rng},
+  [I(Types::ADD)]        = {Precedence::TRM, parse_unr, parse_bin},
+  [I(Types::SUB)]        = {Precedence::TRM, parse_unr, parse_bin},
+  [I(Types::MUL)]        = {Precedence::FCT, parse_nul, parse_bin},
+  [I(Types::DIV)]        = {Precedence::FCT, parse_nul, parse_bin},
+  [I(Types::L_AND)]      = {Precedence::LND, parse_nul, parse_bin},
+  [I(Types::L_OR)]       = {Precedence::LOR, parse_nul, parse_bin},
+  [I(Types::B_AND)]      = {Precedence::BND, parse_nul, parse_bin},
+  [I(Types::B_OR)]       = {Precedence::BOR, parse_nul, parse_bin},
+  [I(Types::CARET)]      = {Precedence::XOR, parse_nul, parse_bin},
+  [I(Types::B_NOT)]      = {Precedence::UNR, parse_unr, parse_nul},
+  [I(Types::L_NOT)]      = {Precedence::UNR, parse_unr, parse_nul},
+  [I(Types::L_SHIFT)]    = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::R_SHIFT)]    = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::POW)]        = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::REM)]        = {Precedence::NUL, parse_nul, parse_nul},
 };
-#undef as_int
+#undef I
 #undef parse_nul
 
 ParseRule &get_rule(const Type token_type) {
