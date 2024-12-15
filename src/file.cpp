@@ -1,10 +1,22 @@
 #include "file.hpp"
 #include "logger.hpp"
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 File::File(const char *file_name, const FileMode mode) {
   this->mode      = mode;
   this->file_name = file_name;
-  fp              = fopen(file_name, mode == FILE_MODE_READ ? "rb" : "wb");
+
+  struct stat stat1 {};
+  struct stat stat2 {};
+  lstat(file_name, &stat1);
+  fp = fopen(file_name, mode == FILE_MODE_READ ? "rb" : "wb");
+  fstat(fileno(fp), &stat2);
+  if (stat1.st_dev != stat2.st_dev || stat1.st_ino != stat2.st_ino) {
+    Logger::fatal("Could not securely open file");
+  }
   if (fp == nullptr) {
     Logger::fatal("File not found");
     return;
