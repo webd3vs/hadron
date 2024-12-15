@@ -1,8 +1,8 @@
 #ifndef HADRON_LOGGER_H
 #define HADRON_LOGGER_H 1
 
-#include "bytecode.hpp"
-#include "types.hpp"
+#include "bytecode.h"
+#include "types.h"
 
 class Logger {
   public:

@@ -1,8 +1,6 @@
-#include "parser.hpp"
-#include "bytecode.hpp"
-#include "types.hpp"
-
-#include <string>
+#include "parser.h"
+#include "bytecode.h"
+#include "types.h"
 
 Parser::Parser(Lexer &lexer, Chunk &chunk) : lexer(lexer), chunk(chunk) {
   advance();

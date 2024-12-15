@@ -1,24 +1,12 @@
-#include "file.hpp"
-#include "logger.hpp"
-
-#define __STDC_WANT_LIB_EXT1_ 1
+#include "file.h"
+#include "logger.h"
+#include "memory.h"
 
 #include <cstring>
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifndef __STDC_LIB_EXT1__
-int memcpy_s(
-  void *dest, const size_t destsz, const void *src, const size_t count) {
-  if (!dest || !src || count > destsz) {
-    return -1;
-  }
-  memcpy(dest, src, count);
-  return 0;
-}
-#endif
-
-static int open_file(const char *file_name, int flags) {
+static int open_file(const char *file_name, const int flags) {
   struct stat lstat_info {};
   struct stat fstat_info {};
   int         f;
@@ -134,7 +122,7 @@ FileResult File::write_header() const {
     return FILE_MODE_INVALID;
   }
   FileHeader header;
-  memcpy_s(header.magic, FILE_HEADER_MAGIC_SIZE, magic, FILE_HEADER_MAGIC_SIZE);
+  h_memcpy(header.magic, magic, FILE_HEADER_MAGIC_SIZE);
   header.major = 0;
   header.minor = 1;
   header.flags = 0;

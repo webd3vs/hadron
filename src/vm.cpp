@@ -1,6 +1,5 @@
-#include "vm.hpp"
-#include "bytecode.hpp"
-#include "logger.hpp"
+#include "vm.h"
+#include "logger.h"
 
 #include <cstdio>
 

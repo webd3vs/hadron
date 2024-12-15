@@ -1,12 +1,7 @@
-#include "lexer.hpp"
-
+#include "lexer.h"
 #include "halloc.h"
-#include "logger.hpp"
-#include "types.hpp"
 
-#include <cstdlib>
-#include <stdexcept>
-#include <valarray>
+#include <cmath>
 
 Token nextToken(Lexer &lexer);
 char  next_c(Lexer &lexer);

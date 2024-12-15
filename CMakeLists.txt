@@ -29,8 +29,7 @@ include_directories(include)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Add the executable
-add_executable(hadron ${SOURCES}
-        include/halloc.h)
+add_executable(hadron ${SOURCES})
 
 # Link libraries
 target_link_libraries(hadron m)

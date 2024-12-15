@@ -1,12 +1,9 @@
-#include "arguments.hpp"
-#include "bytecode.hpp"
-#include "file.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
-#include "vm.hpp"
-
-#include <cstring>
-#include <iostream>
+#include "arguments.h"
+#include "bytecode.h"
+#include "file.h"
+#include "lexer.h"
+#include "parser.h"
+#include "vm.h"
 
 #define MAX_EXT_LENGTH      0x10
 #define MAX_DIR_LENGTH      0x100

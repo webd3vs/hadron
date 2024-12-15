@@ -1,5 +1,5 @@
-#include "arguments.hpp"
-#include "logger.hpp"
+#include "arguments.h"
+#include "logger.h"
 
 #include <cstring>
 

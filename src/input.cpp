@@ -1,4 +1,5 @@
-#include "input.hpp"
+#include "input.h"
+#include "util.h"
 
 InputSource::~InputSource() = default;
 
@@ -45,6 +46,6 @@ char StringInput::current() const { return current_char; }
 
 void StringInput::read_chunk(
   char *dest, const size_t start, const size_t length) {
-  strncpy(dest, source + start, length);
+  h_memcpy(dest, source + start, length);
   dest[length] = '\0';
 }

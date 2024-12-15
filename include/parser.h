@@ -1,9 +1,9 @@
 #ifndef HADRON_PARSER_H
 #define HADRON_PARSER_H 1
 
-#include "lexer.hpp"
-#include "logger.hpp"
-#include "symbol.hpp"
+#include "lexer.h"
+#include "logger.h"
+#include "symbol.h"
 
 typedef class Parser {
   public:

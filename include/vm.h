@@ -1,7 +1,7 @@
 #ifndef HADRON_VM_H
 #define HADRON_VM_H
 
-#include "bytecode.hpp"
+#include "bytecode.h"
 
 typedef enum InterpretResult {
   INTERPRET_OK,

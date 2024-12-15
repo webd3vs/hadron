@@ -1,8 +1,7 @@
 #ifndef HADRON_LEXER_H
 #define HADRON_LEXER_H 1
 
-#include "input.hpp"
-#include "types.hpp"
+#include "input.h"
 
 class Lexer {
   bool         end{false};

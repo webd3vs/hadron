@@ -3,12 +3,10 @@
 
 #define CHUNK_SIZE 1024
 
-#include "logger.hpp"
+#include "logger.h"
+#include "util.h"
 
-#include <cstdint>
 #include <cstdio>
-#include <cstring>
-#include <type_traits>
 
 typedef enum __attribute__((__packed__)) FileMode {
   FILE_MODE_READ,
@@ -74,7 +72,7 @@ typedef class File {
       return FILE_MODE_INVALID;
     }
     if constexpr (std::is_same_v<T, char *>) {
-      const size_t length = strnlen(value, MAX_WRITE_LENGTH);
+      const size_t length = h_strnlen(value, MAX_WRITE_LENGTH);
       if (buffer_size + length >= CHUNK_SIZE) {
         if (const FileResult res = write_flush(); res != FILE_STATUS_OK) {
           return res;

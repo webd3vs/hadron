@@ -1,9 +1,9 @@
-#include "logger.hpp"
-#include "types.hpp"
+#include "logger.h"
+#include "types.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <stdlib.h>
 
 static const char *getData(const Token &t) {
   switch (t.type) {

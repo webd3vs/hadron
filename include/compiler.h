@@ -1,7 +1,7 @@
 #ifndef HADRON_COMPILER_H
 #define HADRON_COMPILER_H 1
 
-#include "lexer.hpp"
+#include "lexer.h"
 
 typedef struct Compiler {
   Lexer *lexer;

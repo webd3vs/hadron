@@ -1,8 +1,7 @@
 #ifndef HADRON_HALLOC_H
 #define HADRON_HALLOC_H
 
-#include <cstdio>
-#include <logger.hpp>
+// #include "logger.h"
 
 #define MAX_ALLOCATIONS 0x800UL
 

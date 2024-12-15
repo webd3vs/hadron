@@ -1,7 +1,7 @@
 #ifndef HADRON_INPUT_H
 #define HADRON_INPUT_H 1
 
-#include "file.hpp"
+#include "file.h"
 
 #include <cstring>
 
