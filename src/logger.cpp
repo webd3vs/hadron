@@ -2,6 +2,8 @@
 #include "types.hpp"
 
 #include <cstdio>
+#include <cstring>
+#include <stdlib.h>
 
 static const char *getData(const Token &t) {
   switch (t.type) {
@@ -185,6 +187,48 @@ static const char *getData(const Token &t) {
   return "";
 }
 
+static bool supportsAnsi() {
+  static bool checked   = false;
+  static bool supported = false;
+
+  if (checked)
+    return supported;
+  checked = true;
+  if (const char *term = secure_getenv("TERM");
+      term && (strstr(term, "xterm") || strstr(term, "color")))
+    supported = true;
+  return supported;
+}
+
+void Logger::info(const char *msg) {
+  if (supportsAnsi())
+    printf("\x1b[96mINFO\x1b[m %s\n", msg);
+  else
+    printf("INFO: %s\n", msg);
+}
+
+void Logger::warn(const char *msg) {
+  if (supportsAnsi())
+    printf("\x1b[93mWARN\x1b[m %s\n", msg);
+  else
+    printf("WARN: %s\n", msg);
+}
+
+void Logger::error(const char *msg) {
+  if (supportsAnsi())
+    printf("\x1b[91mERROR\x1b[m %s\n", msg);
+  else
+    printf("ERROR: %s\n", msg);
+}
+
+void Logger::fatal(const char *msg) {
+  if (supportsAnsi())
+    printf("\x1b[91;7;1m FATAL \x1b[0;91m %s\x1b[m\n", msg);
+  else
+    printf("FATAL: %s\n", msg);
+  exit(EXIT_FAILURE);
+}
+
 void Logger::print_token(const Token &token) {
   const bool ansi   = supportsAnsi();
   const auto key0   = ansi ? "\x1b[94m" : "";
@@ -206,7 +250,7 @@ void Logger::print_token(const Token &token) {
   printf("%s%i%s }\n", value, token.pos.absEnd, clear);
 }
 
-inline void print_bytes(
+static void print_bytes(
   const int bytes, const Chunk &chunk, int *offset, const char *desc) {
   for (int i = 0; i < bytes; i++) {
     printf("%02x ", chunk.code[(*offset)++]);

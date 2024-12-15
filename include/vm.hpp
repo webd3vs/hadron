@@ -16,9 +16,9 @@ typedef class VM {
   // Chunk *chunk;
   // uint8_t *ip;
   double stack[MAX_STACK]{};
-  double constants[MAX_CONSTANTS]{};
-  int    sp{-1};
-  int    pc{-1};
+  // double constants[MAX_CONSTANTS]{};
+  int sp{-1};
+  // int pc{-1};
 
   public:
   VM() = default;

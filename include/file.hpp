@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <type_traits>
 
 typedef enum __attribute__((__packed__)) FileMode {
@@ -23,6 +24,7 @@ typedef enum __attribute__((__packed__)) FileResult {
 } FileResult;
 
 #define FILE_HEADER_MAGIC_SIZE 4
+#define MAX_WRITE_LENGTH       0x1000
 
 typedef struct FileHeader {
   char    magic[FILE_HEADER_MAGIC_SIZE];
@@ -72,7 +74,7 @@ typedef class File {
       return FILE_MODE_INVALID;
     }
     if constexpr (std::is_same_v<T, char *>) {
-      const size_t length = strlen(value);
+      const size_t length = strnlen(value, MAX_WRITE_LENGTH);
       if (buffer_size + length >= CHUNK_SIZE) {
         if (const FileResult res = write_flush(); res != FILE_STATUS_OK) {
           return res;
