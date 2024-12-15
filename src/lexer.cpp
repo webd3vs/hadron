@@ -607,7 +607,7 @@ Token Lexer::advance() {
           return emit(Types::CMP_GEQ);
         return emit(Types::CMP_GT);
       case '<':
-        if (match('>')) {
+        if (match('<')) {
           if (match('='))
             return emit(Types::L_SHIFT_EQ);
           return emit(Types::L_SHIFT);
