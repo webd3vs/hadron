@@ -1,24 +1,63 @@
 #include "file.hpp"
 #include "logger.hpp"
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#define __STDC_WANT_LIB_EXT1_ 1
 
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+
+#ifndef __STDC_LIB_EXT1__
+int memcpy_s(
+  void *dest, const size_t destsz, const void *src, const size_t count) {
+  if (!dest || !src || count > destsz) {
+    return -1;
+  }
+  memcpy(dest, src, count);
+  return 0;
+}
+#endif
+
+static int open_file(const char *file_name, int flags) {
+  struct stat lstat_info {};
+  struct stat fstat_info {};
+  int         f;
+
+  if (lstat(file_name, &lstat_info) == -1) {
+    Logger::fatal("File does not exist");
+    return -1;
+  }
+  if (!(S_ISREG(lstat_info.st_mode))) {
+    Logger::fatal("File is not a regular file");
+    return -1;
+  }
+  if ((f = open(file_name, flags)) == -1) {
+    Logger::fatal("File could not be opened");
+    return -1;
+  }
+
+  if (fstat(f, &fstat_info) == -1) {
+    Logger::fatal("Error opening file");
+    return -1;
+  }
+
+  if (lstat_info.st_ino != fstat_info.st_ino ||
+      lstat_info.st_dev != fstat_info.st_dev) {
+    Logger::fatal("Incompatible file type");
+    return -1;
+  }
+
+  return f;
+}
 File::File(const char *file_name, const FileMode mode) {
   this->mode      = mode;
   this->file_name = file_name;
 
-  struct stat stat1 {};
-  struct stat stat2 {};
-  lstat(file_name, &stat1);
-  fp = fopen(file_name, mode == FILE_MODE_READ ? "rb" : "wb");
-  fstat(fileno(fp), &stat2);
-  if (stat1.st_dev != stat2.st_dev || stat1.st_ino != stat2.st_ino) {
-    Logger::fatal("Could not securely open file");
-  }
+  const int fd = open_file(file_name, mode);
+
+  fp = fdopen(fd, mode == FILE_MODE_READ ? "rb" : "wb");
   if (fp == nullptr) {
-    Logger::fatal("File not found");
+    Logger::fatal("File could not be opened");
     return;
   }
   fseek(fp, 0, SEEK_END);
@@ -95,7 +134,7 @@ FileResult File::write_header() const {
     return FILE_MODE_INVALID;
   }
   FileHeader header;
-  memcpy(header.magic, magic, FILE_HEADER_MAGIC_SIZE);
+  memcpy_s(header.magic, FILE_HEADER_MAGIC_SIZE, magic, FILE_HEADER_MAGIC_SIZE);
   header.major = 0;
   header.minor = 1;
   header.flags = 0;
