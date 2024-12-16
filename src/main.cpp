@@ -5,6 +5,8 @@
 #include "parser.h"
 #include "vm.h"
 
+#include <cstring>
+
 #define MAX_EXT_LENGTH      0x10
 #define MAX_DIR_LENGTH      0x100
 #define MAX_FILENAME_LENGTH 0x100
@@ -43,10 +45,10 @@ static void repl() {
       break;
     }
 
-    StringInput input(line);
-    Lexer       lexer(input);
-    Chunk       chunk;
-    Parser      parser_instance(lexer, chunk);
+    Input  input(line);
+    Lexer  lexer(input);
+    Chunk  chunk;
+    Parser parser_instance(lexer, chunk);
 
     parse_expression(parser_instance, Precedence::NUL);
     chunk.write(OpCodes::RETURN);
@@ -97,8 +99,8 @@ int main(const int argc, char *argv[]) {
       continue;
     }
 
-    FileInput input(file);
-    Lexer     lexer(input);
+    Input input(file);
+    Lexer lexer(input);
 
     Parser parser_instance(lexer, chunk);
 

@@ -13,7 +13,7 @@ class Lexer {
   int          line{1};
   int          start{0};
   int          absStart{0};
-  InputSource &input;
+  Input &input;
 
   char               next();
   [[nodiscard]] char current() const;
@@ -26,7 +26,7 @@ class Lexer {
   [[nodiscard]] Token number(char first_char);
 
   public:
-  explicit Lexer(InputSource &input) : input(input) {
+  explicit Lexer(Input &input) : input(input) {
     next_char = input.next(); // manually load the first char
   }
   Token advance();

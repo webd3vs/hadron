@@ -1,51 +1,44 @@
 #include "input.h"
 #include "util.h"
 
-InputSource::~InputSource() = default;
+Input::~Input() = default;
 
-char FileInput::next() {
-  char c;
-  if (file.read_byte(&c) == FILE_READ_FAILURE) {
-    printf("File read failure\n");
-    end          = true;
-    current_char = '\0';
+char Input::next() {
+  if (type == InputType::FILE) {
+    char c;
+    if (file.read_byte(&c) == FILE_READ_FAILURE) {
+      printf("File read failure\n");
+      end          = true;
+      current_char = '\0';
+    }
+    return current_char = c;
   }
-  return current_char = c;
-}
-
-char FileInput::peek() const {
-  char c;
-  if (file.lookup_byte(&c) == FILE_STATUS_OK) {
-    return c;
-  }
-  return '\0';
-}
-
-char FileInput::current() const { return current_char; }
-
-void FileInput::read_chunk(
-  char *dest, const size_t start, const size_t length) {
-  file.read_chunk(dest, start, length);
-}
-
-char StringInput::next() {
   if (index >= length) {
     return '\0';
   }
   return current_char = source[index++];
 }
 
-char StringInput::peek() const {
-  if (index >= length) {
+char Input::peek() const {
+  if (type == InputType::FILE) {
+    char c;
+    if (file.lookup_byte(&c) == FILE_STATUS_OK)
+      return c;
     return '\0';
   }
+  if (index >= length)
+    return '\0';
   return source[index];
 }
 
-char StringInput::current() const { return current_char; }
+char Input::current() const { return current_char; }
 
-void StringInput::read_chunk(
-  char *dest, const size_t start, const size_t length) {
+void Input::read_chunk(
+  char *dest, const size_t start, const size_t length) const {
+  if (type == InputType::FILE) {
+    file.read_chunk(dest, start, length);
+    return;
+  }
   h_memcpy(dest, source + start, length);
   dest[length] = '\0';
 }

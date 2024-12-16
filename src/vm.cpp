@@ -59,7 +59,7 @@ InterpretResult VM::interpret(Chunk &chunk) {
       case OpCodes::RANGE_L_IN:
       case OpCodes::RANGE_R_IN:
       case OpCodes::RANGE_INCL:
-        printf("Range [%g, %g]", stack[sp - 1], stack[sp]);
+        printf("Range [%g, %g]\n", stack[sp - 1], stack[sp]);
         sp--;
         stack[sp] = 0;
         Logger::warn("Range operators not implemented yet");

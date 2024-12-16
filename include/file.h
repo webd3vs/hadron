@@ -9,6 +9,7 @@
 #include <cstdio>
 
 typedef enum __attribute__((__packed__)) FileMode {
+  FILE_MODE_NONE,
   FILE_MODE_READ,
   FILE_MODE_WRITE,
 } FileMode;
@@ -32,24 +33,25 @@ typedef struct FileHeader {
   uint8_t name;
 } FileHeader;
 
-typedef class File {
+class File {
   uint8_t buffer[CHUNK_SIZE]{};
 
-  FILE       *fp;
-  const char *file_name;
+  FILE       *fp{nullptr};
+  const char *file_name{nullptr};
   size_t      file_size{0};
   size_t      buffer_size{0};
   size_t      buffer_pos{0};
   size_t      position{0};
 
   bool       eof{false};
-  FileMode   mode;
+  FileMode   mode{};
   FileResult write_flush();
   void       close();
 
   [[nodiscard]] uint8_t name_length() const;
 
   public:
+   File() = default;
    File(const char *file_name, FileMode mode);
   ~File() { close(); }
 
@@ -101,6 +103,6 @@ typedef class File {
     }
     return *this;
   }
-} File;
+};
 
 #endif // HADRON_READER_H

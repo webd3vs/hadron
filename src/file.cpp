@@ -37,6 +37,7 @@ static int open_file(const char *file_name, const int flags) {
 
   return f;
 }
+
 File::File(const char *file_name, const FileMode mode) {
   this->mode      = mode;
   this->file_name = file_name;

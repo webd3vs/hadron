@@ -3,47 +3,32 @@
 
 #include "file.h"
 
-#include <cstring>
-
-class InputSource {
-  public:
-           InputSource() = default;
-  virtual ~InputSource();
-
-  virtual char               next()                                = 0;
-  [[nodiscard]] virtual char peek() const                          = 0;
-  [[nodiscard]] virtual char current() const                       = 0;
-  virtual void read_chunk(char *dest, size_t start, size_t length) = 0;
+enum class InputType : uint8_t {
+  FILE,
+  STRING,
 };
 
-class FileInput final : public InputSource {
-  File &file;
-  bool  end{false};
-  char  current_char{'\0'};
+static File def;
+
+class Input {
+  const InputType type;
+  size_t          index{0};
+  size_t          length{0};
+  char            current_char{'\0'};
+  bool            end{false};
+  const char     *source{nullptr};
+  File           &file{def};
 
   public:
-  explicit FileInput(File &file) : file(file) {}
+  explicit Input(File &file) : type(InputType::FILE), file(file) {}
+  explicit Input(const char *source)
+    : type(InputType::STRING), length(h_strlen(source)), source(source) {}
+  ~Input();
 
-  char               next() override;
-  [[nodiscard]] char peek() const override;
-  [[nodiscard]] char current() const override;
-  void read_chunk(char *dest, size_t start, size_t length) override;
-};
-
-class StringInput final : public InputSource {
-  const char *source;
-  size_t      index{0};
-  size_t      length{0};
-  char        current_char{'\0'};
-
-  public:
-  explicit StringInput(const char *source)
-    : source(source), length(strnlen(source, 0x400)) {}
-
-  char               next() override;
-  [[nodiscard]] char peek() const override;
-  [[nodiscard]] char current() const override;
-  void read_chunk(char *dest, size_t start, size_t length) override;
+  char               next();
+  [[nodiscard]] char peek() const;
+  [[nodiscard]] char current() const;
+  void               read_chunk(char *dest, size_t start, size_t length) const;
 };
 
 #endif // HADRON_INPUT_H
