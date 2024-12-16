@@ -1,7 +1,7 @@
 #ifndef HADRON_LOGGER_H
 #define HADRON_LOGGER_H 1
 
-#include "bytecode.h"
+#include "vm.h"
 #include "types.h"
 
 class Logger {

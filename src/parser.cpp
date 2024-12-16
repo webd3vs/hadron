@@ -1,5 +1,4 @@
 #include "parser.h"
-#include "bytecode.h"
 #include "types.h"
 
 Parser::Parser(Lexer &lexer, Chunk &chunk) : lexer(lexer), chunk(chunk) {
