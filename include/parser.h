@@ -36,6 +36,7 @@ typedef enum class Precedence : int8_t {
   BSH,
   TRM,
   FCT,
+  EXP,
   RNG,
   UNR,
   GRP,

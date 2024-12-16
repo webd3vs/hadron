@@ -54,7 +54,7 @@ static void repl() {
     chunk.write(OpCodes::RETURN);
 
     VM vm;
-    Logger::disassemble(chunk, "REPL");
+    // Logger::disassemble(chunk, "REPL");
     vm.interpret(chunk);
   }
 }

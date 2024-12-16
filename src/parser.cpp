@@ -136,6 +136,9 @@ static LedFn parse_bin = [](Parser &parser, const Token &token) {
     case Types::CARET:
       parser.chunk.write(OpCodes::B_XOR);
       break;
+    case Types::POW:
+      parser.chunk.write(OpCodes::POW);
+      break;
     default:
       Logger::fatal("Unknown binary operator");
   }
@@ -278,7 +281,7 @@ static ParseRule rules[I(Types::MAX_TOKENS)] = {
   [I(Types::L_NOT)]      = {Precedence::UNR, parse_unr, parse_nul},
   [I(Types::L_SHIFT)]    = {Precedence::NUL, parse_nul, parse_nul},
   [I(Types::R_SHIFT)]    = {Precedence::NUL, parse_nul, parse_nul},
-  [I(Types::POW)]        = {Precedence::NUL, parse_nul, parse_nul},
+  [I(Types::POW)]        = {Precedence::EXP, parse_nul, parse_bin},
   [I(Types::REM)]        = {Precedence::NUL, parse_nul, parse_nul},
 };
 #undef I

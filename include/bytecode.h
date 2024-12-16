@@ -12,6 +12,7 @@ typedef enum class OpCodes : uint8_t {
   SUB        = '-',
   MUL        = '*',
   DIV        = '/',
+  POW        = 'p',
   L_AND      = 'a',
   L_OR       = 'o',
   B_AND      = '&',

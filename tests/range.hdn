@@ -1,5 +1,5 @@
 // This file cannot be run yet, statements are not implemented
-// valid
+// Valid Examples:
 .1...2   // 0.1 .. 0.2
 .1..=2   // 0.1 ..= 2
 .1..=.2  // 0.1 ..= 0.2
@@ -9,7 +9,7 @@
 .1=..=.2 // 0.1 =..= 0.2
 1.=..=.2 // 1 =..= 0.2
 
-// Examples:
+// Invalid Examples:
 // 1....2  // Use `1. .. .2` instead
 // 1...=2  // Use `1. ..= 2` instead
 // 1...=.2 // Use `1. ..= .2` instead

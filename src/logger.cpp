@@ -283,6 +283,9 @@ void Logger::disassemble(const Chunk &chunk, const char *name) {
       case OpCodes::DIV:
         print_bytes(1, chunk, &offset, "DIV");
         break;
+      case OpCodes::POW:
+        print_bytes(1, chunk, &offset, "POW");
+        break;
       case OpCodes::NEGATE:
         print_bytes(1, chunk, &offset, "NEG");
         break;

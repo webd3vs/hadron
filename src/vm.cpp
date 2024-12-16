@@ -1,7 +1,9 @@
 #include "vm.h"
 #include "logger.h"
 
+#include <cmath>
 #include <cstdio>
+#include <math.h>
 
 InterpretResult VM::interpret(Chunk &chunk) {
   for (int ip = 0; ip < chunk.pos; ip++) {
@@ -30,6 +32,10 @@ InterpretResult VM::interpret(Chunk &chunk) {
         break;
       case OpCodes::DIV:
         stack[sp - 1] = stack[sp - 1] / stack[sp];
+        sp--;
+        break;
+      case OpCodes::POW:
+        stack[sp - 1] = pow(stack[sp - 1], stack[sp]);
         sp--;
         break;
       case OpCodes::L_AND:

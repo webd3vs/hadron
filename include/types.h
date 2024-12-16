@@ -124,7 +124,7 @@ typedef union Any {
 typedef struct Token {
   Type type;
   // todo temp
-  uint8_t index;
+  uint8_t index{};
 
   struct Position {
     int line;
