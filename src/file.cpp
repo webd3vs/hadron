@@ -19,7 +19,7 @@ static int open_file(const char *file_name, const int flags) {
     Logger::fatal("File is not a regular file");
     return -1;
   }
-  if ((f = open(file_name, flags)) == -1) {
+  if ((f = open(file_name, flags | O_NOFOLLOW | O_CLOEXEC)) == -1) {
     Logger::fatal("File could not be opened");
     return -1;
   }
@@ -42,16 +42,19 @@ File::File(const char *file_name, const FileMode mode) {
   this->mode      = mode;
   this->file_name = file_name;
 
-  const int fd = open_file(file_name, mode);
+  const int fd = open_file(file_name,
+    mode == FILE_MODE_READ ? O_RDONLY : O_WRONLY | O_CREAT | O_TRUNC);
 
-  fp = fdopen(fd, mode == FILE_MODE_READ ? "rb" : "wb");
-  if (fp == nullptr) {
+  if ((fp = fdopen(fd, mode == FILE_MODE_READ ? "rb" : "wb")) == nullptr) {
     Logger::fatal("File could not be opened");
     return;
   }
-  fseek(fp, 0, SEEK_END);
-  file_size = ftell(fp);
-  rewind(fp);
+
+  if (mode == FILE_MODE_READ) {
+    fseek(fp, 0, SEEK_END);
+    file_size = ftell(fp);
+    rewind(fp);
+  }
 }
 
 void File::close() {
