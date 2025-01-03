@@ -1,9 +1,7 @@
 #include "parser.h"
 #include "types.h"
 
-Parser::Parser(Lexer &lexer, Chunk &chunk) : lexer(lexer), chunk(chunk) {
-  advance();
-}
+Parser::Parser(Lexer &lexer, Chunk &chunk) : lexer(lexer), chunk(chunk) {}
 
 void Parser::advance() {
   prev_token    = current_token;
@@ -45,7 +43,7 @@ static NudFn parse_fxn = [](Parser &parser, const Token &) {
   parser.consume(Types::L_CURLY, "Expected '{' to start function body");
   const size_t start_address = parser.chunk.pos;
   while (!parser.match(Types::R_CURLY) /* && !parser.is_at_end() */) {
-    parse_expression(parser, Precedence::NUL);
+    parser.parse_expression(Precedence::NUL);
   }
   // const size_t end_address = parser.chunk.pos;
 
@@ -57,8 +55,10 @@ static NudFn parse_fxn = [](Parser &parser, const Token &) {
   parser.chunk.write(OpCodes::FX_EXIT);
 
   // Store function metadata in symbol table
-  parser.symbols.insert(
+  const bool insert_result = parser.symbols.insert(
     name, static_cast<int>(start_address), SymbolType::FUNCTION);
+  if (!insert_result)
+    Logger::fatal("Out of free symbols");
 };
 
 static NudFn parse_lit = [](Parser &parser, const Token &token) {
@@ -72,7 +72,6 @@ static NudFn parse_lit = [](Parser &parser, const Token &token) {
       parser.chunk.write(token.value.f64);
       break;
     case Types::STR:
-      // parser.chunk.write(token.index);
       parser.symbols.insert(
         static_cast<const char *>(token.value.ptr), 0, SymbolType::STR);
       break;
@@ -82,7 +81,7 @@ static NudFn parse_lit = [](Parser &parser, const Token &token) {
 };
 
 static NudFn parse_unr = [](Parser &parser, const Token &token) {
-  parse_expression(parser, get_rule(token.type).precedence);
+  parser.parse_expression(get_rule(token.type).precedence);
   switch (token.type) {
     case Types::ADD: // unary + does nothing
       break;
@@ -101,12 +100,13 @@ static NudFn parse_unr = [](Parser &parser, const Token &token) {
 };
 
 static NudFn parse_grp = [](Parser &parser, const Token &) {
-  parse_expression(parser, Precedence::NUL);
+  parser.parse_expression(Precedence::NUL);
   parser.consume(Types::R_PAREN, "Expected ')'");
 };
 
 static LedFn parse_bin = [](Parser &parser, const Token &token) {
-  parse_expression(parser, get_rule(token.type).precedence);
+  parser.parse_expression(get_rule(token.type).precedence);
+
   switch (token.type) {
     case Types::ADD:
       parser.chunk.write(OpCodes::ADD);
@@ -144,7 +144,7 @@ static LedFn parse_bin = [](Parser &parser, const Token &token) {
 };
 
 static LedFn parse_rng = [](Parser &parser, const Token &token) {
-  parse_expression(parser, get_rule(token.type).precedence);
+  parser.parse_expression(get_rule(token.type).precedence);
   switch (token.type) {
     case Types::RANGE_EXCL:
       parser.chunk.write(OpCodes::RANGE_EXCL);
@@ -169,18 +169,18 @@ static LedFn parse_dcl = [](Parser &parser, const Token &) {
       // variable declaration
       parser.consume(Types::NAME, "Expected variable name");
       parser.consume(Types::EQ, "Expected assignment");
-      parse_expression(parser, Precedence::NUL);
+      parser.parse_expression(Precedence::NUL);
       parser.symbols.insert("test", 0, SymbolType::I32);
       break;
     }
     case Types::COLON: {
       parser.consume(Types::COLON, "Expected colon");
-      parse_expression(parser, Precedence::NUL);
+      parser.parse_expression(Precedence::NUL);
       break;
     }
     case Types::L_PAREN: {
       parser.consume(Types::L_PAREN, "Expected '('");
-      parse_expression(parser, Precedence::GRP);
+      parser.parse_expression(Precedence::GRP);
       parser.consume(Types::R_PAREN, "Expected ')'");
       break;
     }
@@ -290,20 +290,30 @@ ParseRule &get_rule(const Type token_type) {
   return rules[static_cast<int>(token_type)];
 }
 
-void parse_expression(Parser &parser, const Precedence precedence) {
-  const Token token = parser.current_token;
-  parser.advance();
+void Parser::parse() {
+  advance();
+  while (current_token.type != Types::END) {
+    parse_expression(Precedence::NUL);
+    match(Types::SEMICOLON);
+  }
+  chunk.write(OpCodes::RETURN);
+}
+
+void Parser::parse_expression(const Precedence precedence) {
+  const Token token = current_token;
+  advance();
 
   ParseRule rule = get_rule(token.type);
   if (!rule.nud) {
     Logger::print_token(token);
     Logger::fatal("Unexpected token");
   }
-  rule.nud(parser, token);
 
-  while (precedence < get_rule(parser.current_token.type).precedence) {
-    Token operator_token = parser.current_token;
-    parser.advance();
+  rule.nud(*this, token);
+
+  while (precedence < get_rule(current_token.type).precedence) {
+    Token operator_token = current_token;
+    advance();
     if (operator_token.type == Types::END) {
       break;
     }
@@ -314,6 +324,6 @@ void parse_expression(Parser &parser, const Precedence precedence) {
       Logger::fatal("Unexpected operator");
     }
 
-    rule.led(parser, operator_token);
+    rule.led(*this, operator_token);
   }
 }

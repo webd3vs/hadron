@@ -5,7 +5,7 @@
 #include <cstdint>
 
 #define SYMBOL_NAME_LEN   0x20
-#define SYMBOL_TABLE_SIZE 0x400
+#define SYMBOL_TABLE_SIZE 0x100
 
 typedef enum class SymbolType : uint8_t {
   NUL,
@@ -26,9 +26,12 @@ class SymbolTable {
 
   static size_t hash(const char *name);
 
+  Symbol *get_entry(const char *name);
+
   public:
-  bool    insert(const char *name, int location, SymbolType type);
+  bool insert(const char *name, int location, SymbolType type);
+
   Symbol *lookup(const char *name);
 };
 
-#endif
+#endif // HADRON_SYMBOL_H

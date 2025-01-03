@@ -23,6 +23,17 @@ class Input {
   explicit Input(File &file) : type(InputType::FILE), file(file) {}
   explicit Input(const char *source)
     : type(InputType::STRING), length(h_strlen(source)), source(source) {}
+  Input &operator=(const Input &input) {
+    if (this == &input)
+      return *this;
+    index        = input.index;
+    length       = input.length;
+    current_char = input.current_char;
+    end          = input.end;
+    source       = input.source;
+    file         = input.file;
+    return *this;
+  }
   ~Input();
 
   char               next();

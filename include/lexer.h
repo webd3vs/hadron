@@ -4,15 +4,15 @@
 #include "input.h"
 
 class Lexer {
-  bool         end{false};
-  bool         had_float{false}; // State-tracking for range operator parsing
-  char         current_char{'\0'};
-  char         next_char{'\0'};
-  int          iterator{-1};
-  int          character{1};
-  int          line{1};
-  int          start{0};
-  int          absStart{0};
+  bool   end{false};
+  bool   had_float{false}; // State-tracking for range operator parsing
+  char   current_char{'\0'};
+  char   next_char{'\0'};
+  int    iterator{-1};
+  int    character{1};
+  int    line{1};
+  int    start{0};
+  int    absStart{0};
   Input &input;
 
   char               next();
@@ -29,6 +29,7 @@ class Lexer {
   explicit Lexer(Input &input) : input(input) {
     next_char = input.next(); // manually load the first char
   }
+  void  reset(const Input &input);
   Token advance();
 };
 

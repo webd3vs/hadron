@@ -1,6 +1,8 @@
 #ifndef HADRON_VM_H
 #define HADRON_VM_H
 
+#include "util.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
@@ -40,7 +42,7 @@ class Chunk {
 
   template <typename T> void write(T value) {
     if constexpr (std::is_same_v<T, char *>) {
-      const size_t len = strlen(value);
+      const size_t len = h_strlen(value);
       for (size_t i = 0; i < len; i++) {
         code[pos++] = value[i];
       }
@@ -49,6 +51,7 @@ class Chunk {
       pos += sizeof(T);
     }
   }
+  void clear() { pos = 0; }
 };
 
 typedef enum InterpretResult {

@@ -35,6 +35,12 @@ void build_path(const File &file, char *path) {
 }
 
 static void repl() {
+  Chunk  chunk;
+  VM     vm;
+  Input  input("");
+  Lexer  lexer(input);
+  Parser parser(lexer, chunk);
+
   for (;;) {
     char line[0x400];
     printf("> ");
@@ -44,31 +50,26 @@ static void repl() {
       break;
     }
 
-    Input  input(line);
-    Lexer  lexer(input);
-    Chunk  chunk;
-    Parser parser_instance(lexer, chunk);
+    input = Input(line);
 
-    parse_expression(parser_instance, Precedence::NUL);
-    chunk.write(OpCodes::RETURN);
-
-    VM vm;
-    // Logger::disassemble(chunk, "REPL");
+    lexer.reset(input);
+    chunk.clear();
+    parser.parse();
     vm.interpret(chunk);
   }
 }
 
 int main(const int argc, char *argv[]) {
-  ArgumentParser parser;
+  ArgumentParser argument_parser;
 
-  init_arguments(&parser, argc, argv);
+  init_arguments(&argument_parser, argc, argv);
 
-  if (!parser.positional_count) {
+  if (!argument_parser.positional_count) {
     repl();
   }
 
-  for (int i = 0; i < parser.positional_count; i++) {
-    File  file(parser.positional_args[i], FILE_MODE_READ);
+  for (int i = 0; i < argument_parser.positional_count; i++) {
+    File  file(argument_parser.positional_args[i], FILE_MODE_READ);
     Chunk chunk;
 
     char ext[MAX_EXT_LENGTH];
@@ -88,23 +89,21 @@ int main(const int argc, char *argv[]) {
       while (file.read_byte(&c) != FILE_READ_DONE) {
         chunk.write(c);
       }
-      if (parser.is_set("disassemble")) {
+      if (argument_parser.is_set("disassemble")) {
         Logger::disassemble(chunk, name);
         continue;
       }
 
-      VM vm;
-      vm.interpret(chunk);
+      VM().interpret(chunk);
       continue;
     }
 
     Input input(file);
     Lexer lexer(input);
 
-    Parser parser_instance(lexer, chunk);
+    Parser parser(lexer, chunk);
 
-    parse_expression(parser_instance, Precedence::NUL);
-    chunk.write(OpCodes::RETURN);
+    parser.parse();
 
     char path[MAX_DIR_LENGTH + MAX_FILENAME_LENGTH];
     build_path(file, path);
@@ -123,7 +122,7 @@ int main(const int argc, char *argv[]) {
     for (int j = 0; j < chunk.pos; j++) {
       out << chunk.code[j];
     }
-    Logger::disassemble(chunk, name);
+    // Logger::disassemble(chunk, name);
   }
 
   return 0;

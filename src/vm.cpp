@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <cstdio>
-#include <math.h>
 
 InterpretResult VM::interpret(Chunk &chunk) {
   for (int ip = 0; ip < chunk.pos; ip++) {

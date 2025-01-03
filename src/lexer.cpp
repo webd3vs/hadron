@@ -3,13 +3,30 @@
 
 #include <cmath>
 
-Token nextToken(Lexer &lexer);
-char  next_c(Lexer &lexer);
-bool  match(Lexer &lexer, char c);
+void Lexer::reset(const Input &input) {
+  this->input  = input;
+  end          = false;
+  had_float    = false;
+  current_char = '\0';
+  next_char    = this->input.next();
+  iterator     = -1;
+  character    = 1;
+  line         = 1;
+  start        = 0;
+  absStart     = 0;
+}
 
-static bool isAlpha(char);
-static bool isDec(char);
-static bool isHex(char);
+static bool isDec(const char c) { return c >= '0' && c <= '9'; }
+
+static bool isHex(const char c) {
+  return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+         (c >= 'A' && c <= 'F');
+}
+
+static bool isAlpha(const char c) {
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '$' ||
+         c == '_';
+}
 
 Type keyword(const char *k) {
   switch (k[0]) {
@@ -631,7 +648,8 @@ Token Lexer::advance() {
         next();
         return emit(Types::STR);
       }
-      case '`': { // multiline strings
+      case '`': {
+        // multiline strings
         while (peek() != '`') {
           if (peek() == '\\')
             next();
@@ -687,14 +705,4 @@ Token Lexer::advance() {
       }
     }
   }
-}
-
-bool isDec(const char c) { return c >= '0' && c <= '9'; }
-bool isHex(const char c) {
-  return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
-         (c >= 'A' && c <= 'F');
-}
-bool isAlpha(const char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '$' ||
-         c == '_';
 }
