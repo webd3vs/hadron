@@ -218,15 +218,11 @@ Token Lexer::number(const char first_char) {
   // . if branching
   // This one has proved to be the fastest.
 
-  char    num[96]    = {};
-  char    frac[16]   = {};
-  char    exp[12]    = {};
-  uint8_t num_index  = 0;
-  uint8_t frac_index = 0;
-  uint8_t exp_index  = 0;
-
-  char    *buffer = num;
-  uint8_t *index  = &num_index;
+  double  value     = 0;
+  double  loose     = 0;
+  double  exponent  = 0;
+  double  base      = 10;
+  uint8_t float_idx = 0;
 
   bool done      = false;
   bool had_exp   = false;
@@ -240,11 +236,35 @@ Token Lexer::number(const char first_char) {
 
   bool is_exp_neg = false;
 
+#define insert(x)                                                              \
+  if (is_binary || is_octal) {                                                 \
+    value *= base;                                                             \
+    value += x;                                                                \
+  } else if (had_exp) {                                                        \
+    exponent *= base;                                                          \
+    exponent += x;                                                             \
+  } else if (had_float) {                                                      \
+    value += (x) * (1.0 / pow(base, ++float_idx));                             \
+  } else {                                                                     \
+    value *= base;                                                             \
+    value += x;                                                                \
+  }
+#define insert_hex(x)                                                          \
+  if (had_float) {                                                             \
+    value += (x) * (1.0 / pow(base, ++float_idx));                             \
+  } else {                                                                     \
+    value *= 16;                                                               \
+    value += x;                                                                \
+  }
+#define insert_octal(x)                                                        \
+  if (oct_loose) {                                                             \
+    loose *= 8;                                                                \
+    loose += x;                                                                \
+  }
+
   switch (first_char) {
     case '.':
       had_float = true;
-      buffer    = frac;
-      index     = &frac_index;
       break;
     case '0':
       set_type  = true;
@@ -261,8 +281,8 @@ Token Lexer::number(const char first_char) {
     case '7':
     case '8':
     case '9':
-      had_value          = true;
-      buffer[(*index)++] = static_cast<char>(first_char - '0');
+      had_value = true;
+      value     = first_char - '0';
       break;
     default:
       return emit(Types::ERROR);
@@ -271,14 +291,16 @@ Token Lexer::number(const char first_char) {
   for (;;) {
     switch (const char c = peek()) {
       case '0':
-        had_value          = true;
-        buffer[(*index)++] = 0;
+        had_value = true;
+        insert(0);
+        insert_octal(0);
         next();
         break;
       case '1':
-        had_value          = true;
-        had_under          = false;
-        buffer[(*index)++] = 1;
+        had_value = true;
+        had_under = false;
+        insert(1);
+        insert_octal(1);
         next();
         break;
       case '2':
@@ -289,9 +311,10 @@ Token Lexer::number(const char first_char) {
       case '7':
         if (is_binary)
           return emit(Types::ERROR);
-        had_value          = true;
-        had_under          = false;
-        buffer[(*index)++] = static_cast<char>(c - '0');
+        had_value = true;
+        had_under = false;
+        insert(c - '0');
+        insert_octal(c - '0');
         next();
         break;
       case '8':
@@ -300,10 +323,10 @@ Token Lexer::number(const char first_char) {
           return emit(Types::ERROR);
         if (is_octal)
           return emit(Types::ERROR);
-        had_value          = true;
-        had_under          = false;
-        oct_loose          = false;
-        buffer[(*index)++] = static_cast<char>(c - '0');
+        had_value = true;
+        had_under = false;
+        oct_loose = false;
+        insert(c - '0');
         next();
         break;
       case 'a':
@@ -312,9 +335,9 @@ Token Lexer::number(const char first_char) {
       case 'f':
         if (!is_hex || had_exp)
           return emit(Types::ERROR);
-        had_value          = true;
-        had_under          = false;
-        buffer[(*index)++] = static_cast<char>(c - 'a' + 10);
+        had_value = true;
+        had_under = false;
+        insert_hex(c - 'a' + 10);
         next();
         break;
       case 'A':
@@ -323,24 +346,26 @@ Token Lexer::number(const char first_char) {
       case 'F':
         if (!is_hex || had_exp)
           return emit(Types::ERROR);
-        had_value          = true;
-        had_under          = false;
-        buffer[(*index)++] = static_cast<char>(c - 'A' + 10);
+        had_value = true;
+        had_under = false;
+        insert_hex(c - 'A' + 10);
         next();
         break;
       case 'b':
       case 'B':
         if (is_hex) {
-          had_value          = true;
-          had_under          = false;
-          buffer[(*index)++] = 11;
+          had_value = true;
+          had_under = false;
+          insert_hex(11);
           next();
           break;
         }
         if (!set_type)
           return emit(Types::ERROR);
-        is_binary = true;
         set_type  = false;
+        oct_loose = false;
+        is_binary = true;
+        base      = 2;
         had_exp   = true; // binary number cannot have exponent
         had_float = true; // binary number cannot have floating point
         next();
@@ -349,8 +374,10 @@ Token Lexer::number(const char first_char) {
       case 'O':
         if (!set_type)
           return emit(Types::ERROR);
-        is_octal  = true;
         set_type  = false;
+        oct_loose = false;
+        is_octal  = true;
+        base      = 8;
         had_exp   = true; // octal number cannot have exponent
         had_float = true; // octal number cannot have floating point
         next();
@@ -359,8 +386,10 @@ Token Lexer::number(const char first_char) {
       case 'X':
         if (!set_type)
           return emit(Types::ERROR);
-        is_hex   = true;
-        set_type = false;
+        set_type  = false;
+        oct_loose = false;
+        is_hex    = true;
+        base      = 16;
         next();
         if (!isHex(peek()) && peek() != '.')
           return emit(Types::ERROR);
@@ -374,19 +403,17 @@ Token Lexer::number(const char first_char) {
           return emit(Types::ERROR);
         if (had_float)
           return emit(Types::ERROR);
-        // switch buffers
-        buffer = frac;
-        index  = &frac_index;
         next();
         if (!had_value && !isHex(peek()))
           return emit(Types::ERROR);
         had_float = true;
+        oct_loose = false;
         break;
       case 'e':
       case 'E':
         if (is_hex) {
-          had_value          = true;
-          buffer[(*index)++] = 14;
+          had_value = true;
+          insert_hex(14);
           next();
           break;
         }
@@ -399,8 +426,6 @@ Token Lexer::number(const char first_char) {
           return emit(Types::ERROR);
         had_exp   = true;
         oct_loose = false;
-        buffer    = exp;
-        index     = &exp_index;
         break;
       case 'p':
       case 'P':
@@ -412,8 +437,6 @@ Token Lexer::number(const char first_char) {
           is_exp_neg = current() == '-';
         if (!isDec(peek()))
           return emit(Types::ERROR);
-        buffer = exp;
-        index  = &exp_index;
         break;
       case '_':
       case '\'':
@@ -435,38 +458,6 @@ Token Lexer::number(const char first_char) {
   if (is_hex && had_float && !had_exp)
     return emit(Types::ERROR);
 
-  double value = 0;
-
-  for (int i = 0; i < num_index; i++) {
-    const int j = num_index - 1 - i;
-    if (is_hex) {
-      value += num[j] * pow(16.0, i);
-      continue;
-    }
-    if (is_binary) {
-      value += num[j] * pow(2.0, i);
-      continue;
-    }
-    if (is_octal || oct_loose) {
-      value += num[j] * pow(8.0, i);
-      continue;
-    }
-    value += num[j] * pow(10.0, i);
-  }
-  for (int i = 0; i < frac_index; i++) {
-    if (is_hex) {
-      value += frac[i] / pow(16.0, i + 1);
-      continue;
-    }
-    value += frac[i] / pow(10.0, i + 1);
-  }
-
-  uint32_t exponent = 0;
-  for (int i = 0; i < exp_index; i++) {
-    const int j = exp_index - 1 - i;
-    exponent += static_cast<uint32_t>(exp[j] * pow(10, i));
-  }
-
   if (is_exp_neg)
     value /= pow(is_hex ? 2.0 : 10.0, exponent);
   else
@@ -476,8 +467,10 @@ Token Lexer::number(const char first_char) {
     return emit(Types::HEX, value);
   if (is_binary)
     return emit(Types::BINARY, value);
-  if (is_octal || oct_loose)
+  if (is_octal)
     return emit(Types::OCTAL, value);
+  if (oct_loose)
+    return emit(Types::OCTAL, loose);
   return emit(Types::DEC, value);
 }
 
