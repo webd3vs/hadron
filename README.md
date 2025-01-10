@@ -3,7 +3,6 @@
 </div>
 
 <div id="badges" align="center">
-  <a href="https://github.com/hadron-lang/hadron/build"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/hadron-lang/hadron/c-cpp.yml?colorA=333&colorB=afa&style=for-the-badge"></a>
   <a href="https://github.com/hadron-lang/hadron/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/hadron-lang/hadron?colorA=333&colorB=ffa&style=for-the-badge"></a>
   <a href="https://github.com/hadron-lang/hadron/issues"><img alt="Issues" src="https://img.shields.io/github/issues/hadron-lang/hadron?colorA=333&colorB=faa&style=for-the-badge"></a>
   <a href="https://github.com/hadron-lang/hadron/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/hadron-lang/hadron?colorA=333&colorB=aaf&style=for-the-badge"></a>
