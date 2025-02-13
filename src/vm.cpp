@@ -4,8 +4,16 @@
 #include <cmath>
 #include <cstdio>
 
+void print_stack(double stack[], int sp) {
+  for (int i = 0; i <= sp; i++) {
+    printf("[%g] ", stack[i]);
+  }
+  printf("\n");
+}
+
 InterpretResult VM::interpret(Chunk &chunk) {
   for (int ip = 0; ip < chunk.pos; ip++) {
+    // print_stack(stack, sp);
     switch (const auto opcode = static_cast<OpCode>(chunk.code[ip]); opcode) {
       case OpCodes::FX_ENTRY:
       case OpCodes::FX_EXIT:
@@ -15,7 +23,7 @@ InterpretResult VM::interpret(Chunk &chunk) {
         ip += 9;
         break;
       case OpCodes::RETURN:
-        printf("%g\n", stack[sp]);
+        printf("%g\n", stack[sp--]);
         return INTERPRET_OK;
       case OpCodes::ADD:
         stack[sp - 1] = stack[sp - 1] + stack[sp];
@@ -65,9 +73,7 @@ InterpretResult VM::interpret(Chunk &chunk) {
       case OpCodes::RANGE_R_IN:
       case OpCodes::RANGE_INCL:
         printf("Range [%g, %g]\n", stack[sp - 1], stack[sp]);
-        sp--;
-        stack[sp] = 0;
-        Logger::warn("Range operators not implemented yet");
+        stack[--sp] = 0;
         break;
       default:
         Logger::fatal("Unknown opcode\n");

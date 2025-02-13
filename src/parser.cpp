@@ -294,9 +294,11 @@ void Parser::parse() {
   advance();
   while (current_token.type != Types::END) {
     parse_expression(Precedence::NUL);
-    match(Types::SEMICOLON);
+    const bool is_stmt =
+      match(Types::SEMICOLON) || current_token.pos.line != prev_token.pos.line;
+    if (!is_stmt || current_token.type == Types::END)
+      chunk.write(OpCodes::RETURN);
   }
-  chunk.write(OpCodes::RETURN);
 }
 
 void Parser::parse_expression(const Precedence precedence) {
@@ -305,7 +307,6 @@ void Parser::parse_expression(const Precedence precedence) {
 
   ParseRule rule = get_rule(token.type);
   if (!rule.nud) {
-    Logger::print_token(token);
     Logger::fatal("Unexpected token");
   }
 
@@ -313,16 +314,18 @@ void Parser::parse_expression(const Precedence precedence) {
 
   while (precedence < get_rule(current_token.type).precedence) {
     Token operator_token = current_token;
-    advance();
     if (operator_token.type == Types::END) {
       break;
     }
+    bool same_line = token.pos.line == operator_token.pos.line;
 
     rule = get_rule(operator_token.type);
-    if (!rule.led) {
-      Logger::print_token(operator_token);
+    if (!rule.led && same_line) {
       Logger::fatal("Unexpected operator");
+    } else if (!same_line) {
+      return;
     }
+    advance();
 
     rule.led(*this, operator_token);
   }

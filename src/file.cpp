@@ -5,37 +5,45 @@
 #include <cstring>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 static int open_file(const char *file_name, const int flags) {
   struct stat lstat_info {};
   struct stat fstat_info {};
-  int         f;
+  int         fd;
 
-  if (lstat(file_name, &lstat_info) == -1) {
-    Logger::fatal("File does not exist");
-    return -1;
+  if (!(flags & O_CREAT)) {
+    if (lstat(file_name, &lstat_info) == -1) {
+      Logger::fatal("File does not exist");
+      return -1;
+    }
+    if (!(S_ISREG(lstat_info.st_mode))) {
+      Logger::fatal("File is not aregular  file");
+      return -1;
+    }
   }
-  if (!(S_ISREG(lstat_info.st_mode))) {
-    Logger::fatal("File is not a regular file");
-    return -1;
-  }
-  if ((f = open(file_name, flags | O_NOFOLLOW | O_CLOEXEC)) == -1) {
+
+  if ((fd = open(file_name, flags | O_NOFOLLOW | O_CLOEXEC, 0644)) == -1) {
     Logger::fatal("File could not be opened");
     return -1;
   }
 
-  if (fstat(f, &fstat_info) == -1) {
-    Logger::fatal("Error opening file");
-    return -1;
+  if (!(flags & O_CREAT)) {
+    if (fstat(fd, &fstat_info) == -1) {
+      Logger::fatal("Error opening file");
+      close(fd);
+      return -1;
+    }
+
+    if (lstat_info.st_ino != fstat_info.st_ino ||
+        lstat_info.st_dev != fstat_info.st_dev) {
+      Logger::fatal("Incompatible file type");
+      close(fd);
+      return -1;
+    }
   }
 
-  if (lstat_info.st_ino != fstat_info.st_ino ||
-      lstat_info.st_dev != fstat_info.st_dev) {
-    Logger::fatal("Incompatible file type");
-    return -1;
-  }
-
-  return f;
+  return fd;
 }
 
 File::File(const char *file_name, const FileMode mode) {
@@ -90,21 +98,21 @@ FileResult File::read() {
   return FILE_STATUS_OK;
 }
 
-FileResult File::read_byte(char *pc) {
+FileResult File::read_byte(char *ptr) {
   if (mode != FILE_MODE_READ) {
     return FILE_MODE_INVALID;
   }
   if (buffer_pos == buffer_size) {
     if (eof) {
-      *pc = '\0';
+      *ptr = '\0';
       return FILE_READ_DONE;
     }
     if (read() == FILE_READ_FAILURE) {
-      *pc = '\0';
+      *ptr = '\0';
       return FILE_READ_FAILURE;
     }
   }
-  *pc = static_cast<char>(buffer[buffer_pos++]);
+  *ptr = static_cast<char>(buffer[buffer_pos++]);
   return FILE_STATUS_OK;
 }
 

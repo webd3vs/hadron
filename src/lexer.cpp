@@ -224,6 +224,7 @@ Token Lexer::number(const char first_char) {
   double  base      = 10;
   uint8_t float_idx = 0;
 
+  had_float      = false;
   bool done      = false;
   bool had_exp   = false;
   bool is_hex    = false;
@@ -237,30 +238,22 @@ Token Lexer::number(const char first_char) {
   bool is_exp_neg = false;
 
 #define insert(x)                                                              \
-  if (is_binary || is_octal) {                                                 \
-    value *= base;                                                             \
-    value += x;                                                                \
-  } else if (had_exp) {                                                        \
-    exponent *= base;                                                          \
-    exponent += x;                                                             \
-  } else if (had_float) {                                                      \
+  if (is_binary || is_octal)                                                   \
+    value = value * base + x;                                                  \
+  else if (had_exp)                                                            \
+    exponent = exponent * base + x;                                            \
+  else if (had_float)                                                          \
     value += (x) * (1.0 / pow(base, ++float_idx));                             \
-  } else {                                                                     \
-    value *= base;                                                             \
-    value += x;                                                                \
-  }
+  else                                                                         \
+    value = value * base + x;
 #define insert_hex(x)                                                          \
-  if (had_float) {                                                             \
+  if (had_float)                                                               \
     value += (x) * (1.0 / pow(base, ++float_idx));                             \
-  } else {                                                                     \
-    value *= 16;                                                               \
-    value += x;                                                                \
-  }
+  else                                                                         \
+    value = value * 16 + x;
 #define insert_octal(x)                                                        \
-  if (oct_loose) {                                                             \
-    loose *= 8;                                                                \
-    loose += x;                                                                \
-  }
+  if (oct_loose)                                                               \
+    loose = loose * 8 + x;
 
   switch (first_char) {
     case '.':
@@ -485,14 +478,16 @@ Token Lexer::advance() {
     switch (c) {
       case '@':
         return emit(Types::AT);
-      case '.':
-        if (isDec(peek()))
+      case '.':            // .
+        if (isDec(peek())) // float
           return number('.');
-        if (match('.')) {
-          if (match('='))
+        if (match('.')) { // ..
+          if (match('=')) // ..=
             return emit(Types::RANGE_R_IN);
-          if (peek() == '.') {
-            if (peek2() == '.' || !had_float)
+          if (peek() == '.') { // ...
+            if (!had_float)
+              return next(), emit(Types::ERROR);
+            if (peek2() == '.')
               return next(), next(), emit(Types::ERROR);
             return emit(Types::RANGE_EXCL);
           }
