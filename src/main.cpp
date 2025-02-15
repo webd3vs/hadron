@@ -12,13 +12,13 @@
 
 static void init_arguments(
   ArgumentParser *parser, const int argc, char *argv[]) {
-  parser->add("verbose", 'v');
+  parser->add("verbose", 'v', false);
   parser->add("lang", 'l');
   parser->add("out", 'o');
-  parser->add("disassemble", 'd');
+  parser->add("disassemble", 'd', false);
   //! deprecated options
-  parser->add("compile", 'c');
-  parser->add("interpret", 'i');
+  parser->add("compile", 'c', false);
+  parser->add("interpret", 'i', false);
 
   parser->parse(argc, argv);
 }
@@ -64,12 +64,16 @@ int main(const int argc, char *argv[]) {
 
   init_arguments(&argument_parser, argc, argv);
 
-  if (!argument_parser.positional_count) {
+  if (!argument_parser.positional.size()) {
     repl();
   }
 
-  for (int i = 0; i < argument_parser.positional_count; i++) {
-    File  file(argument_parser.positional_args[i], FILE_MODE_READ);
+  for (const auto &arg : argument_parser.args) {
+    printf("- \"%s\" (-%c): \"%s\"\n", arg.long_name, arg.short_name, arg.value);
+  }
+
+  for (const auto filename : argument_parser.positional) {
+    File  file(filename, FILE_MODE_READ);
     Chunk chunk;
 
     char ext[MAX_EXT_LENGTH];
@@ -119,8 +123,8 @@ int main(const int argc, char *argv[]) {
 
     out << name;
 
-    for (int j = 0; j < chunk.pos; j++) {
-      out << chunk.code[j];
+    for (int i = 0; i < chunk.pos; i++) {
+      out << chunk.code[i];
     }
     // Logger::disassemble(chunk, name);
   }

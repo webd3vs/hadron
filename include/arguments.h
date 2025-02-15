@@ -1,36 +1,31 @@
+#include <cwctype>
 #ifndef HADRON_ARGUMENTS_H
 #define HADRON_ARGUMENTS_H 1
 
-#define MAX_ARGS 10
+#include <vector>
 
-typedef struct Argument {
+struct Argument {
   const char *long_name;
   char        short_name;
   char       *value;
   bool        is_set;
   bool        has_value;
-} Argument;
+};
 
-typedef class ArgumentParser {
-  Argument &def();
+class ArgumentParser {
   Argument &find(const char *name);
   Argument &find_short(char name);
 
-  public:
-  int      arg_count{0};
-  int      positional_count{0};
-  Argument args[MAX_ARGS]{};
-  char    *positional_args[MAX_ARGS]{};
+  Argument def{};
 
-  void  add(const char *long_name, char short_name);
+  public:
+  std::vector<Argument> args{};
+  std::vector<char *>   positional{};
+
+  void  add(const char *long_name, char short_name, bool has_value = true);
   void  parse(int argc, char *argv[]);
   char *get(const char *name);
   bool  is_set(const char *name);
-
-  ArgumentParser() {
-    add(nullptr, '\0');
-    args[0].has_value = false;
-  }
-} ArgumentParser;
+};
 
 #endif // HADRON_ARGUMENTS_H
